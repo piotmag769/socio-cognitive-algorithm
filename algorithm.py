@@ -1,3 +1,9 @@
+from functools import cmp_to_key
+from copy import deepcopy
+
+import random
+import time
+
 from jmetal.algorithm.singleobjective import GeneticAlgorithm
 from jmetal.core.solution import Solution
 from jmetal.config import store
@@ -8,20 +14,10 @@ from jmetal.util.comparator import Comparator, ObjectiveComparator
 from jmetal.util.evaluator import Evaluator
 from jmetal.util.generator import Generator
 from jmetal.util.termination_criterion import TerminationCriterion
-from jmetal.logger import get_logger
-from jmetal.algorithm.singleobjective.genetic_algorithm import GeneticAlgorithm
-from jmetal.operator.crossover import PMXCrossover
+from jmetal.operator.crossover import SPXCrossover
 from jmetal.operator.mutation import BitFlipMutation
-from jmetal.util.comparator import ObjectiveComparator
 from jmetal.util.termination_criterion import StoppingByEvaluations
 from jmetal.problem.singleobjective.knapsack import Knapsack
-
-import random
-import time
-from functools import cmp_to_key
-from copy import deepcopy
-
-logger = get_logger(__name__)
 
 
 class Agent:
@@ -70,7 +66,7 @@ class Agent:
 
     def __eq__(self, other):
         # Two different objects are always unequal.
-        id(self) == id(other)
+        return id(self) == id(other)
 
     def __hash__(self):
         return hash(id(self))
@@ -146,8 +142,6 @@ class Runner:
             agent.algorithm.solutions = agent.algorithm.evaluate(
                 agent.algorithm.solutions
             )
-            for s in agent.algorithm.solutions:
-                print(s)
 
         for agent in self.agents:
             agent.algorithm.init_progress()
@@ -157,7 +151,7 @@ class Runner:
             for agent in self.agents:
                 agent.algorithm.step()
                 agent.algorithm.update_progress()
-            # self.exchange_market.exchange_information()
+            self.exchange_market.exchange_information()
 
         total_computing_time = time.time() - start_computing_time
 
@@ -167,12 +161,12 @@ class Runner:
 
 
 if __name__ == "__main__":
-    num_of_items = 5
+    NUM_OF_ITEMS = 20
     problem = Knapsack(
-        number_of_items=num_of_items,
+        number_of_items=NUM_OF_ITEMS,
         capacity=10,
-        weights=[random.randint(1, 10) for _ in range(num_of_items)],
-        profits=[random.randint(1, 10) for _ in range(num_of_items)],
+        weights=[random.randint(1, 10) for _ in range(NUM_OF_ITEMS)],
+        profits=[random.randint(1, 10) for _ in range(NUM_OF_ITEMS)],
     )
     print("WEIGHTS:", problem.weights)
     print("PROFITS:", problem.profits)
@@ -182,14 +176,11 @@ if __name__ == "__main__":
         population_size=2,
         offspring_population_size=100,
         mutation=BitFlipMutation(0.5),
-        crossover=PMXCrossover(0.9),
+        crossover=SPXCrossover(0.9),
         selection=BinaryTournamentSelection(),
-        termination_criterion=StoppingByEvaluations(max_evaluations=1000),
+        termination_criterion=StoppingByEvaluations(max_evaluations=10000),
     )
     runner.run_simulation()
 
     for agent in runner.agents:
-        print(
-            agent.algorithm.solutions
-            == agent.algorithm.replacement(agent.algorithm.solutions, [])
-        )
+        print(agent.algorithm.get_result())
