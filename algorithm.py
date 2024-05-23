@@ -3,6 +3,8 @@ from copy import deepcopy
 
 import random
 import time
+import os
+import datetime
 from math import ceil
 from typing import Sequence
 
@@ -58,7 +60,8 @@ class BaseAgent:
 
 
 class AgentWithTrust(BaseAgent):
-    # Trust level equal to i means that i-th best solution will be shared - the lower, the better.
+    # Trust level equal to i means that starting from the i-th best solution 
+    # (population * population_part_to_swap) solutions will be shared - the lower, the better.
     MAX_TRUST_LEVEL = 0
 
     def __init__(self, algorithm: GeneticAlgorithm):
@@ -162,6 +165,7 @@ class BaseRunner:
         population_generator: Generator = store.default_generator,
         population_evaluator: Evaluator = store.default_evaluator,
         solution_comparator: Comparator = ObjectiveComparator(0),
+        output_file = None
     ):
         self.agents = [
             BaseAgent(
@@ -181,6 +185,17 @@ class BaseRunner:
             for _ in range(agents_number)
         ]
         self.exchange_market = ExchangeMarket(self.agents)
+        self.output_file = output_file
+
+    def note_progress(self, agent, agent_id, gen_nr):
+        # If it's the first record, write column descriptors
+        if gen_nr + agent_id == 1:
+            self.output_file.write(f"generation,agent_id,score\n")
+        # Write down important statistics
+        score = agent.algorithm.get_result().objectives[0]
+        self.output_file.write(
+            f"{gen_nr}, {agent_id}, {score}\n"
+        )
 
     def run_simulation(self):
         start_computing_time = time.time()
@@ -200,9 +215,11 @@ class BaseRunner:
         number_of_generations = 0
         while not agent.algorithm.stopping_condition_is_met():
             number_of_generations += 1
-            for agent in self.agents:
+            for agent_id, agent in enumerate(self.agents):
                 agent.algorithm.step()
                 agent.algorithm.update_progress()
+                if self.output_file is not None: 
+                    self.note_progress(agent, agent_id, number_of_generations)
             if number_of_generations % BaseRunner.GENERATIONS_PER_SWAP == 0:
                 self.exchange_market.exchange_information()
 
@@ -227,6 +244,7 @@ class RunnerWithTrust(BaseRunner):
         population_generator: Generator = store.default_generator,
         population_evaluator: Evaluator = store.default_evaluator,
         solution_comparator: Comparator = ObjectiveComparator(0),
+        output_file = None
     ):
         self.agents = [
             AgentWithTrust(
@@ -246,39 +264,59 @@ class RunnerWithTrust(BaseRunner):
             for _ in range(agents_number)
         ]
         self.exchange_market = ExchangeMarket(self.agents)
+        self.output_file = output_file
 
 
 if __name__ == "__main__":
+    
+    # Problem definition
     NUM_OF_ITEMS = 10
     problem = Sphere(
         number_of_variables=NUM_OF_ITEMS,
     )
-    runner = BaseRunner(
-        agents_number=10,
-        problem=deepcopy(problem),
-        population_size=50,
-        offspring_population_size=30,
-        mutation=SimpleRandomMutation(0.5),
-        crossover=SBXCrossover(0.9),
-        selection=BinaryTournamentSelection(),
-        termination_criterion=StoppingByEvaluations(max_evaluations=10000),
-    )
-    runner.run_simulation()
+    
+    # Output file prep
+    if not os.path.exists("./output"):
+        os.makedirs("./output")
+    now = datetime.datetime.now()
+    current_date = f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
 
-    for agent in runner.agents:
-        print(agent.algorithm.get_result().objectives)
+    # BASE RUNNER
+    output_file_name = "BASE_RUNNER_"+ current_date +".csv"
+    with open("output/" + output_file_name, "wt") as f:
+        
+        runner = BaseRunner(
+            agents_number=10,
+            problem=deepcopy(problem),
+            population_size=50,
+            offspring_population_size=30,
+            mutation=SimpleRandomMutation(0.5),
+            crossover=SBXCrossover(0.9),
+            selection=BinaryTournamentSelection(),
+            termination_criterion=StoppingByEvaluations(max_evaluations=10000),
+            output_file=f
+        )
+        runner.run_simulation()
+        print("BASE AGENTS")
+        for agent in runner.agents:
+            print(agent.algorithm.get_result().objectives)
 
-    runner = RunnerWithTrust(
-        agents_number=10,
-        problem=problem,
-        population_size=50,
-        offspring_population_size=30,
-        mutation=SimpleRandomMutation(0.5),
-        crossover=SBXCrossover(0.9),
-        selection=BinaryTournamentSelection(),
-        termination_criterion=StoppingByEvaluations(max_evaluations=10000),
-    )
-    runner.run_simulation()
-
-    for agent in runner.agents:
-        print(agent.algorithm.get_result().objectives)
+    # TRUST RUNNER
+    output_file_name = "TRUST_RUNNER_"+ current_date +".csv"
+    with open("output/" + output_file_name, "wt") as f:
+        
+        runner = RunnerWithTrust(
+            agents_number=10,
+            problem=problem,
+            population_size=50,
+            offspring_population_size=30,
+            mutation=SimpleRandomMutation(0.5),
+            crossover=SBXCrossover(0.9),
+            selection=BinaryTournamentSelection(),
+            termination_criterion=StoppingByEvaluations(max_evaluations=10000),
+            output_file=f
+        )
+        runner.run_simulation()
+        print("\nAGENTS WITH TRUST")
+        for agent in runner.agents:
+            print(agent.algorithm.get_result().objectives)
