@@ -15,15 +15,34 @@ if __name__ == "__main__":
     # Plot creation
     fig = plt.figure(1)
 
-    plt.subplot(1,1,1, title="Best Score Per Generation", xlabel="Generation Number", ylabel="Score")
-    plt.plot(df1["generation"].unique(), df1.groupby(['generation'])['score'].max(), "tab:green", label=sys.argv[1])
-    plt.plot(df2["generation"].unique(), df2.groupby(['generation'])['score'].max(), "tab:purple", label=sys.argv[2])
+    plt.subplot(
+        1,
+        1,
+        1,
+        title="Best Score Per Generation",
+        xlabel="Generation Number",
+        ylabel="Score",
+    )
+    plt.plot(
+        df1["generation"].unique(),
+        df1.groupby(["generation"])["score"].max(),
+        "tab:green",
+        label=sys.argv[1],
+    )
+    plt.plot(
+        df2["generation"].unique(),
+        df2.groupby(["generation"])["score"].max(),
+        "tab:purple",
+        label=sys.argv[2],
+    )
     plt.legend()
 
     # Saving of the plot
     if not os.path.exists("./graphs"):
         os.makedirs("./graphs")
     now = datetime.datetime.now()
-    current_date = f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
+    current_date = (
+        f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
+    )
     fig.set_size_inches(18, 10)
-    fig.savefig(f'./graphs/graph_{current_date}.png', dpi=100)
+    fig.savefig(f"./graphs/graph_{current_date}.png", dpi=100)
