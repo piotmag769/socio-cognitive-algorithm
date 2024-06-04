@@ -1,6 +1,5 @@
 .idea
 .vscode
 /output
-/graphs
 venv
 __pycache__
