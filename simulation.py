@@ -17,7 +17,7 @@ if __name__ == "__main__":
     if not os.path.exists("./output"):
         os.makedirs("./output")
     
-    for _ in range(10):  # Number of tests
+    for _ in range(50):  # Number of tests
         
         now = datetime.datetime.now()
         current_date = (
