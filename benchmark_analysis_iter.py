@@ -34,6 +34,18 @@ if __name__ == "__main__":
         "BaseAgent_Sphere",
         "AgentWithTrust_Sphere",
     ]
+    # limit on the fitness axis
+    exp_limits = [
+        [44.5, 48],
+        [44.5, 48],
+        [1300, 2100],
+        [1300, 2100],
+        [1150, 1500],
+        [1150, 1500],
+        [350, 600],
+        [350, 600],
+    ]
+
     exp_labels = []
     exp_iter = []
     exp_values = []
@@ -69,7 +81,7 @@ if __name__ == "__main__":
     Tweak parameters below when adding new problems or agents!
     '''
 
-    for exp_name in experiments:
+    for i, exp_name in enumerate(experiments):
         
         current_df = df.loc[df['exp_label'] == exp_name]
 
@@ -78,9 +90,9 @@ if __name__ == "__main__":
         exp_data = []
         iter_labels = []
 
-        for i in range(steps_count):
+        for j in range(steps_count):
             
-            iter_label = iteration_interval * (i+1)
+            iter_label = iteration_interval * (j+1)
             iter_labels.append(iter_label)
             
             iter_exp_values = current_df.loc[current_df['iter'] == iter_label]
@@ -91,6 +103,8 @@ if __name__ == "__main__":
             labels=iter_labels
             )
         ax.set_title(f"{exp_name} - 50 runs")
+        print(f"{i+1}/{len(exp_limits)}")
+        ax.set_ylim(exp_limits[i])
 
         # Plot saving
         if not os.path.exists("./graphs/iter"):
