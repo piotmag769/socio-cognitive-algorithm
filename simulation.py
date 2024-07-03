@@ -16,9 +16,9 @@ if __name__ == "__main__":
     # Output file prep
     if not os.path.exists("./output"):
         os.makedirs("./output")
-    
+
     for _ in range(50):  # Number of tests
-        
+
         now = datetime.datetime.now()
         current_date = (
             f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
@@ -45,7 +45,9 @@ if __name__ == "__main__":
                         mutation=SimpleRandomMutation(0.5),
                         crossover=SBXCrossover(0.5),
                         selection=BinaryTournamentSelection(),
-                        termination_criterion=StoppingByEvaluations(max_evaluations=10000),
+                        termination_criterion=StoppingByEvaluations(
+                            max_evaluations=10000
+                        ),
                         output_file=f,
                     )
                     runner.run_simulation()
