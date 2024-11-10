@@ -8,17 +8,20 @@ from jmetal.operator.mutation import SimpleRandomMutation
 from jmetal.util.termination_criterion import StoppingByEvaluations
 from jmetal.problem.singleobjective.unconstrained import Sphere, Rastrigin
 
-from agents import BaseAgent, AgentWithTrust
+from agents import BaseAgent, AgentWithTrust, StrategyAgent, AcceptStrategy, SendStrategy
 from runner import Runner
 from benchmark_problems import ExpandedSchaffer, Griewank
+
 
 if __name__ == "__main__":
     # Output file prep
     if not os.path.exists("./output"):
         os.makedirs("./output")
 
-    for _ in range(50):  # Number of tests
+    for i in range(3):  # Number of tests
 
+        print(f"\n### Seria {i} ###")
+        
         now = datetime.datetime.now()
         current_date = (
             f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
@@ -31,7 +34,7 @@ if __name__ == "__main__":
             ExpandedSchaffer(NUM_OF_VARS),
             Griewank(NUM_OF_VARS),
         ]:
-            for agent_class in [BaseAgent, AgentWithTrust]:
+            for agent_class in [BaseAgent, AgentWithTrust, StrategyAgent]:  
                 output_file_name = f"{agent_class.__name__}_{problem.__class__.__name__}_{current_date}.csv"
 
                 with open("output/" + output_file_name, "wt") as f:
@@ -48,6 +51,8 @@ if __name__ == "__main__":
                         termination_criterion=StoppingByEvaluations(
                             max_evaluations=10000
                         ),
+                        send_strategy=SendStrategy.Outlying,
+                        accept_strategy=AcceptStrategy.Different,
                         output_file=f,
                     )
                     runner.run_simulation()
@@ -55,7 +60,7 @@ if __name__ == "__main__":
                     print(
                         f"Best result for {agent_class.__name__} for {problem.__class__.__name__} problem:",
                         max(
-                            agent.algorithm.get_result().objectives[0]
+                            agent.algorithm.result().objectives[0]
                             for agent in runner.agents
                         ),
                     )

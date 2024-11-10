@@ -12,7 +12,7 @@ from jmetal.util.evaluator import Evaluator
 from jmetal.util.generator import Generator
 from jmetal.util.termination_criterion import TerminationCriterion
 
-from agents import BaseAgent
+from agents import BaseAgent, StrategyAgent, AcceptStrategy, SendStrategy
 from exchange_logic import ExchangeMarket
 
 
@@ -32,25 +32,49 @@ class Runner:
         population_generator: Generator = store.default_generator,
         population_evaluator: Evaluator = store.default_evaluator,
         solution_comparator: Comparator = ObjectiveComparator(0),
+        accept_strategy: AcceptStrategy = None,
+        send_strategy: SendStrategy = None,
         output_file: Optional[TextIOWrapper] = None,
     ):
-        self.agents = [
-            agent_class(
-                GeneticAlgorithm(
-                    problem,
-                    population_size,
-                    offspring_population_size,
-                    mutation,
-                    crossover,
-                    selection,
-                    termination_criterion,
-                    population_generator,
-                    population_evaluator,
-                    solution_comparator,
+        if agent_class is StrategyAgent:
+            self.agents = [
+                agent_class(
+                    GeneticAlgorithm(
+                        problem,
+                        population_size,
+                        offspring_population_size,
+                        mutation,
+                        crossover,
+                        selection,
+                        termination_criterion,
+                        population_generator,
+                        population_evaluator,
+                        solution_comparator,
+                    ),
+                    send_strategy,
+                    accept_strategy,
                 )
-            )
-            for _ in range(agents_number)
-        ]
+                for _ in range(agents_number)
+            ]
+        else:
+            self.agents = [
+                agent_class(
+                    GeneticAlgorithm(
+                        problem,
+                        population_size,
+                        offspring_population_size,
+                        mutation,
+                        crossover,
+                        selection,
+                        termination_criterion,
+                        population_generator,
+                        population_evaluator,
+                        solution_comparator,
+                    )
+                )
+                for _ in range(agents_number)
+            ]
+            
         self.exchange_market = ExchangeMarket(self.agents)
         self.generations_per_swap = generations_per_swap
         self.output_file = output_file
@@ -60,7 +84,7 @@ class Runner:
         if gen_nr + agent_id == 1:
             self.output_file.write(f"generation,agent_id,score\n")
         # Write down important statistics
-        score = agent.algorithm.get_result().objectives[0]
+        score = agent.algorithm.result().objectives[0]
         self.output_file.write(f"{gen_nr}, {agent_id}, {score}\n")
 
     def run_simulation(self):
@@ -76,7 +100,6 @@ class Runner:
 
         for agent in self.agents:
             agent.algorithm.init_progress()
-
         # TODO: update this to make sense with more compilcated criteria than number of evaluations
         number_of_generations = 0
         while not agent.algorithm.stopping_condition_is_met():
