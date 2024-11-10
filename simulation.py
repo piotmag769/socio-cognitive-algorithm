@@ -8,26 +8,25 @@ from jmetal.operator.mutation import SimpleRandomMutation
 from jmetal.util.termination_criterion import StoppingByEvaluations
 from jmetal.problem.singleobjective.unconstrained import Sphere, Rastrigin
 
-from agents import BaseAgent, AgentWithTrust, StrategyAgent, AcceptStrategy, SendStrategy
-from runner import Runner
-from benchmark_problems import ExpandedSchaffer, Griewank
+from algorithm import AgentWithTrust, BaseAgent
+from algorithm import Runner
+from analysis.constants import OUTPUT_DIR
+from problems import ExpandedSchaffer, Griewank
+
+NUMBER_OF_RUNS = 1
+NUM_OF_VARS = 100
 
 
-if __name__ == "__main__":
-    # Output file prep
-    if not os.path.exists("./output"):
-        os.makedirs("./output")
+def run_simulations_and_save_results():
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
 
-    for i in range(3):  # Number of tests
-
-        print(f"\n### Seria {i} ###")
-        
+    for _ in range(NUMBER_OF_RUNS):
         now = datetime.datetime.now()
         current_date = (
             f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
         )
 
-        NUM_OF_VARS = 100
         for problem in [
             Sphere(NUM_OF_VARS),
             Rastrigin(NUM_OF_VARS),
@@ -37,7 +36,7 @@ if __name__ == "__main__":
             for agent_class in [BaseAgent, AgentWithTrust, StrategyAgent]:  
                 output_file_name = f"{agent_class.__name__}_{problem.__class__.__name__}_{current_date}.csv"
 
-                with open("output/" + output_file_name, "wt") as f:
+                with open(f"{OUTPUT_DIR}/{output_file_name}", "w") as f:
                     runner = Runner(
                         agent_class=agent_class,
                         agents_number=10,
@@ -64,3 +63,7 @@ if __name__ == "__main__":
                             for agent in runner.agents
                         ),
                     )
+
+
+if __name__ == "__main__":
+    run_simulations_and_save_results()

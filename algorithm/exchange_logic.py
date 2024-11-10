@@ -1,7 +1,7 @@
 import random
 from typing import Type, Sequence
 
-from agents import BaseAgent
+from .agents.base import BaseAgent
 
 
 class ExchangeMarket:
