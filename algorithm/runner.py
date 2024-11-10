@@ -12,8 +12,8 @@ from jmetal.util.evaluator import Evaluator
 from jmetal.util.generator import Generator
 from jmetal.util.termination_criterion import TerminationCriterion
 
-from agents import BaseAgent
-from exchange_logic import ExchangeMarket
+from .agents import BaseAgent
+from .exchange_logic import ExchangeMarket
 
 
 class Runner:
@@ -58,7 +58,7 @@ class Runner:
     def note_progress(self, agent, agent_id, gen_nr):
         # If it's the first record, write column descriptors
         if gen_nr + agent_id == 1:
-            self.output_file.write(f"generation,agent_id,score\n")
+            self.output_file.write("generation,agent_id,score\n")
         # Write down important statistics
         score = agent.algorithm.get_result().objectives[0]
         self.output_file.write(f"{gen_nr}, {agent_id}, {score}\n")

@@ -1,14 +1,14 @@
-import os
 import datetime
-import matplotlib.pyplot as plt
-import pandas as pd
+import os
 import re
 
+import matplotlib.pyplot as plt
+import pandas as pd
 
-if __name__ == "__main__":
-    # File loading
-    search_path = "./output/"
+from .constants import MEAN_PLOTS_DIR, OUTPUT_DIR
 
+
+def plot_and_save_graphs_with_mean_best_results_for_each_iteration():
     experiments = [
         "BaseAgent_ExpandedSchaffer",
         "AgentWithTrust_ExpandedSchaffer",
@@ -19,16 +19,15 @@ if __name__ == "__main__":
         "BaseAgent_Sphere",
         "AgentWithTrust_Sphere",
     ]
-    # limit on the fitness axis
     exp_labels = []
     exp_iter = []
     exp_values = []
 
     for experiment_name in experiments:
-        for fname in os.listdir(path=search_path):
-            r = ".*(" + experiment_name + r"){1}.*\.csv"
-            if re.match(r, fname):
-                current_df = pd.read_csv(search_path + fname)
+        for filename in os.listdir(OUTPUT_DIR):
+            regex = rf".*{experiment_name}.*\.csv"
+            if re.match(regex, filename):
+                current_df = pd.read_csv(f"{OUTPUT_DIR}/{filename}")
 
                 current_df = current_df.loc[current_df["generation"] <= 1000]
 
@@ -53,9 +52,7 @@ if __name__ == "__main__":
         exp_data = []
         iter_labels = []
 
-        for j in range(998):
-
-            iter_label = j + 1
+        for iter_label in range(1, 999):
             iter_labels.append(iter_label)
 
             iter_exp_values = current_df.loc[current_df["iter"] == iter_label]
@@ -71,9 +68,9 @@ if __name__ == "__main__":
             ax.set_xlabel("Numer iteracji")
             ax.set_ylabel("Średnia wartość najlepszego dopasowania")
 
-            # Plot saving
-            if not os.path.exists("./graphs/mean"):
-                os.makedirs("./graphs/mean")
+            # Plot saving.
+            if not os.path.exists(MEAN_PLOTS_DIR):
+                os.makedirs(MEAN_PLOTS_DIR)
             now = datetime.datetime.now()
             current_date = (
                 f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
@@ -82,4 +79,10 @@ if __name__ == "__main__":
                 left=0.2, bottom=0.1, right=0.8, top=0.95, wspace=0.4, hspace=0.4
             )
             fig.set_size_inches(10, 7)
-            fig.savefig(f"./graphs/mean/{exp_name}_graph_{current_date}.png", dpi=100)
+            fig.savefig(
+                f"{MEAN_PLOTS_DIR}/{exp_name}_graph_{current_date}.png", dpi=100
+            )
+
+
+if __name__ == "__main__":
+    plot_and_save_graphs_with_mean_best_results_for_each_iteration()

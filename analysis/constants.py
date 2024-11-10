@@ -1,0 +1,7 @@
+OUTPUT_DIR = "./output"
+
+PLOTS_DIR = "./graphs"
+BOX_AND_WHISKERS_PLOTS_DIR = f"{PLOTS_DIR}/box_and_whiskers"
+MEAN_PLOTS_DIR = f"{PLOTS_DIR}/mean"
+
+SIGNIFICANCE_LEVEL = 0.05
