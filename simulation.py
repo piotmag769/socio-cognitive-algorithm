@@ -8,8 +8,15 @@ from jmetal.operator.mutation import SimpleRandomMutation
 from jmetal.util.termination_criterion import StoppingByEvaluations
 from jmetal.problem.singleobjective.unconstrained import Sphere, Rastrigin
 
-from algorithm import AgentWithTrust, BaseAgent
-from algorithm import Runner
+from algorithm import (
+    AcceptStrategy,
+    AgentWithTrust,
+    BaseAgent,
+    Runner,
+    SendStrategy,
+    StrategyAgent,
+)
+
 from analysis.constants import OUTPUT_DIR
 from problems import ExpandedSchaffer, Griewank
 
@@ -33,7 +40,7 @@ def run_simulations_and_save_results():
             ExpandedSchaffer(NUM_OF_VARS),
             Griewank(NUM_OF_VARS),
         ]:
-            for agent_class in [BaseAgent, AgentWithTrust, StrategyAgent]:  
+            for agent_class in [BaseAgent, AgentWithTrust, StrategyAgent]:
                 output_file_name = f"{agent_class.__name__}_{problem.__class__.__name__}_{current_date}.csv"
 
                 with open(f"{OUTPUT_DIR}/{output_file_name}", "w") as f:
