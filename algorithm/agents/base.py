@@ -34,9 +34,13 @@ class BaseAgent:
             : self.algorithm.population_size
         ]
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         # Two different objects are always unequal.
         return id(self) == id(other)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(id(self))
+
+    @classmethod
+    def name(cls) -> str:
+        return cls.__name__

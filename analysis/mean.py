@@ -5,31 +5,28 @@ import re
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from .constants import MEAN_PLOTS_DIR, OUTPUT_DIR
+from .constants_and_params import (
+    MEAN_PLOTS_DIR,
+    NUMBER_OF_ITERATIONS,
+    OUTPUT_DIR,
+    EXPERIMENTS,
+)
 
 
 def plot_and_save_graphs_with_mean_best_results_for_each_iteration():
-    experiments = [
-        "BaseAgent_ExpandedSchaffer",
-        "AgentWithTrust_ExpandedSchaffer",
-        "BaseAgent_Griewank",
-        "AgentWithTrust_Griewank",
-        "BaseAgent_Rastrigin",
-        "AgentWithTrust_Rastrigin",
-        "BaseAgent_Sphere",
-        "AgentWithTrust_Sphere",
-    ]
     exp_labels = []
     exp_iter = []
     exp_values = []
 
-    for experiment_name in experiments:
+    for experiment_name in EXPERIMENTS:
         for filename in os.listdir(OUTPUT_DIR):
             regex = rf".*{experiment_name}.*\.csv"
             if re.match(regex, filename):
                 current_df = pd.read_csv(f"{OUTPUT_DIR}/{filename}")
 
-                current_df = current_df.loc[current_df["generation"] <= 1000]
+                current_df = current_df.loc[
+                    current_df["generation"] <= NUMBER_OF_ITERATIONS
+                ]
 
                 current_df = current_df.loc[
                     current_df.groupby(["generation"])["score"].idxmax()
@@ -43,7 +40,7 @@ def plot_and_save_graphs_with_mean_best_results_for_each_iteration():
     data = {"exp_label": exp_labels, "iter": exp_iter, "exp_value": exp_values}
     df = pd.DataFrame.from_dict(data)
 
-    for i, exp_name in enumerate(experiments):
+    for i, exp_name in enumerate(EXPERIMENTS):
         if i % 2 == 0:
             fig, ax = plt.subplots(1, 1)
 
@@ -52,7 +49,7 @@ def plot_and_save_graphs_with_mean_best_results_for_each_iteration():
         exp_data = []
         iter_labels = []
 
-        for iter_label in range(1, 999):
+        for iter_label in range(1, NUMBER_OF_ITERATIONS + 1):
             iter_labels.append(iter_label)
 
             iter_exp_values = current_df.loc[current_df["iter"] == iter_label]
@@ -69,8 +66,7 @@ def plot_and_save_graphs_with_mean_best_results_for_each_iteration():
             ax.set_ylabel("Średnia wartość najlepszego dopasowania")
 
             # Plot saving.
-            if not os.path.exists(MEAN_PLOTS_DIR):
-                os.makedirs(MEAN_PLOTS_DIR)
+            os.makedirs(MEAN_PLOTS_DIR, exist_ok=True)
             now = datetime.datetime.now()
             current_date = (
                 f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"

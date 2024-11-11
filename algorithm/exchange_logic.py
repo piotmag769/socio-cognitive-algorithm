@@ -2,6 +2,7 @@ import random
 from typing import Type, Sequence
 
 from .agents.base import BaseAgent
+from collections import defaultdict
 
 
 class ExchangeMarket:
@@ -9,18 +10,21 @@ class ExchangeMarket:
         self.agents = agents
 
     def exchange_information(self):
-        was_paired_map = {}
+        was_paired = defaultdict(bool)
         for agent in self.agents:
-            was_paired_map[agent] = True
+            if was_paired[agent]:
+                continue
+
+            was_paired[agent] = True
             not_paired_agents = [
-                ag for ag in self.agents if not was_paired_map.get(ag, False)
+                agent for agent in self.agents if not was_paired[agent]
             ]
 
             if len(not_paired_agents) == 0:
                 break
 
             paired_agent = random.choice(not_paired_agents)
-            was_paired_map[paired_agent] = True
+            was_paired[paired_agent] = True
 
             agent.use_shared_solutions(
                 paired_agent.get_solutions_to_share(agent), paired_agent

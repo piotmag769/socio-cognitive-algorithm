@@ -103,6 +103,7 @@ class StrategyAgent(BaseAgent):
                 : self.algorithm.population_size
             ]
 
+    # FIXME: fix for discrete problems.
     # Returns solutions sorted by the dot product of it's variables and the mean variables of all the solutions
     # in an ascending order.
     def rank_outliers(self, new_solutions=None):

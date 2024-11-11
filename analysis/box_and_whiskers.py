@@ -5,25 +5,17 @@ import re
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from .constants import OUTPUT_DIR, BOX_AND_WHISKERS_PLOTS_DIR
+from .constants_and_params import (
+    EXPERIMENTS,
+    NUMBER_OF_ITERATIONS,
+    OUTPUT_DIR,
+    BOX_AND_WHISKERS_PLOTS_DIR,
+)
+
+ITERATION_INTERVAL = 50
 
 
 def plot_and_save_box_and_whiskers_graphs_with_best_results_for_some_iterations():
-    # Experiment names order matters!!!
-    # It's used later for plotting order.
-    # Group the names by problem type and have
-    # the order of agents consistent between
-    # the problem types.
-    experiments = [
-        "BaseAgent_ExpandedSchaffer",
-        "AgentWithTrust_ExpandedSchaffer",
-        "BaseAgent_Griewank",
-        "AgentWithTrust_Griewank",
-        "BaseAgent_Rastrigin",
-        "AgentWithTrust_Rastrigin",
-        "BaseAgent_Sphere",
-        "AgentWithTrust_Sphere",
-    ]
     # limit on the fitness axis
     exp_limits = [
         [44.5, 48],
@@ -40,19 +32,19 @@ def plot_and_save_box_and_whiskers_graphs_with_best_results_for_some_iterations(
     exp_iter = []
     exp_values = []
 
-    number_of_agents = 10
-    iteration_interval = 50
     steps_count = None
 
-    for experiment_name in experiments:
+    for experiment_name in EXPERIMENTS:
         for filename in os.listdir(path=OUTPUT_DIR):
             regex = rf".*{experiment_name}.*\.csv"
             if re.match(regex, filename):
                 current_df = pd.read_csv(f"{OUTPUT_DIR}/{filename}")
 
-                current_df = current_df.loc[current_df["generation"] <= 1000]
                 current_df = current_df.loc[
-                    current_df["generation"] % iteration_interval == 0
+                    current_df["generation"] <= NUMBER_OF_ITERATIONS
+                ]
+                current_df = current_df.loc[
+                    current_df["generation"] % ITERATION_INTERVAL == 0
                 ]
 
                 current_df = current_df.loc[
@@ -72,7 +64,7 @@ def plot_and_save_box_and_whiskers_graphs_with_best_results_for_some_iterations(
 
     # Plot drawing.
     # Tweak parameters below when adding new problems or agents!
-    for i, exp_name in enumerate(experiments):
+    for i, exp_name in enumerate(EXPERIMENTS):
         current_df = df.loc[df["exp_label"] == exp_name]
 
         fig, ax = plt.subplots(1, 1)
@@ -81,7 +73,7 @@ def plot_and_save_box_and_whiskers_graphs_with_best_results_for_some_iterations(
         iter_labels = []
 
         for j in range(steps_count):
-            iter_label = iteration_interval * (j + 1)
+            iter_label = ITERATION_INTERVAL * (j + 1)
             iter_labels.append(iter_label)
 
             iter_exp_values = current_df.loc[current_df["iter"] == iter_label]
@@ -89,12 +81,11 @@ def plot_and_save_box_and_whiskers_graphs_with_best_results_for_some_iterations(
 
         ax.boxplot(exp_data, labels=iter_labels)
         ax.set_title(exp_name)
-        print(f"{i+1}/{len(exp_limits)}")
+        print(f"{i + 1}/{len(exp_limits)}")
         ax.set_ylim(exp_limits[i])
 
         # Plot saving.
-        if not os.path.exists(BOX_AND_WHISKERS_PLOTS_DIR):
-            os.makedirs(BOX_AND_WHISKERS_PLOTS_DIR)
+        os.makedirs(BOX_AND_WHISKERS_PLOTS_DIR, exist_ok=True)
 
         now = datetime.datetime.now()
         current_date = (

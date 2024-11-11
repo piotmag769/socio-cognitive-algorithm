@@ -9,10 +9,6 @@ from jmetal.core.solution import BinarySolution, FloatSolution
 class ExpandedSchaffer(FloatProblem):
     def __init__(self, number_of_variables: int = 10):
         super(ExpandedSchaffer, self).__init__()
-
-        self.obj_directions = [self.MINIMIZE]
-        self.obj_labels = ["f(X)"]
-
         self.lower_bound = [-100] * number_of_variables
         self.upper_bound = [100] * number_of_variables
 
@@ -31,17 +27,14 @@ class ExpandedSchaffer(FloatProblem):
 
         return solution
 
-    def name(self) -> str:
-        return "Expanded Schaffer"
+    @classmethod
+    def name(cls) -> str:
+        return cls.__name__
 
 
 class Griewank(FloatProblem):
     def __init__(self, number_of_variables: int = 10):
         super(Griewank, self).__init__()
-
-        self.obj_directions = [self.MINIMIZE]
-        self.obj_labels = ["f(X)"]
-
         self.lower_bound = [-600] * number_of_variables
         self.upper_bound = [600] * number_of_variables
 
@@ -60,8 +53,9 @@ class Griewank(FloatProblem):
 
         return solution
 
-    def name(self) -> str:
-        return "Griewank"
+    @classmethod
+    def name(cls) -> str:
+        return cls.__name__
 
 
 class LABS(BinaryProblem):
@@ -97,8 +91,9 @@ class LABS(BinaryProblem):
 
         return new_solution
 
-    def name(self):
-        return "LABS"
+    @classmethod
+    def name(cls) -> str:
+        return cls.__name__
 
 
 def energy_function(sequence):
