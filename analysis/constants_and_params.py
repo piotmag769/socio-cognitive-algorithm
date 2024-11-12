@@ -27,8 +27,14 @@ SEND_STRATEGIES_TO_TEST = [
 # Group the names by problem type and have
 # the order of agents consistent between
 # the problem types.
-EXPERIMENTS = [
-    f"{agent.name()}_{problem.name()}"
-    for problem in PROBLEMS_TO_TEST
-    for agent in AGENTS_TO_TEST
-]
+EXPERIMENTS = []
+for problem in PROBLEMS_TO_TEST:
+    for agent in AGENTS_TO_TEST:
+        if agent is StrategyAgent:
+            for accept_strategy in ACCEPT_STRATEGIES_TO_TEST:
+                for send_strategy in SEND_STRATEGIES_TO_TEST:
+                    EXPERIMENTS.append(
+                        f"{agent.name()}_{accept_strategy}_{send_strategy}_{problem.name()}"
+                    )
+        else:
+            EXPERIMENTS.append(f"{agent.name()}_{problem.name()}")
