@@ -11,7 +11,7 @@ MEAN_PLOTS_DIR = f"{PLOTS_DIR}/mean"
 SIGNIFICANCE_LEVEL = 0.05
 NUMBER_OF_ITERATIONS = 998
 
-AGENTS_TO_TEST = [BaseAgent, StrategyAgent]
+AGENTS_TO_TEST = [StrategyAgent]
 # Change this to test for continuous problems.
 PROBLEMS_TO_TEST = [LABS]
 ACCEPT_STRATEGIES_TO_TEST = [

@@ -40,9 +40,8 @@ def plot_and_save_graphs_with_mean_best_results_for_each_iteration():
     data = {"exp_label": exp_labels, "iter": exp_iter, "exp_value": exp_values}
     df = pd.DataFrame.from_dict(data)
 
+    fig, ax = plt.subplots(1, 1)
     for i, exp_name in enumerate(EXPERIMENTS):
-        if i % 2 == 0:
-            fig, ax = plt.subplots(1, 1)
 
         current_df = df.loc[df["exp_label"] == exp_name]
 
@@ -55,29 +54,24 @@ def plot_and_save_graphs_with_mean_best_results_for_each_iteration():
             iter_exp_values = current_df.loc[current_df["iter"] == iter_label]
             exp_data.append(iter_exp_values["exp_value"].values.mean().tolist())
 
-        ax.plot(iter_labels, exp_data, label=exp_name.split("_")[0])
-
-        if i % 2 == 1:
+        if exp_data[-1] <= 2400:
+            ax.plot(iter_labels, exp_data, label=exp_name)
             fig.legend()
-            ax.set_title(
-                f"Średnia wartość najlepszego dopasowania w każdej iteracji - {exp_name.split("_")[1]}"
-            )
-            ax.set_xlabel("Numer iteracji")
-            ax.set_ylabel("Średnia wartość najlepszego dopasowania")
+    ax.set_title(f"Średnia wartość najlepszego dopasowania w każdej iteracji")
+    ax.set_xlabel("Numer iteracji")
+    ax.set_ylabel("Średnia wartość najlepszego dopasowania")
 
-            # Plot saving.
-            os.makedirs(MEAN_PLOTS_DIR, exist_ok=True)
-            now = datetime.datetime.now()
-            current_date = (
-                f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
-            )
-            plt.subplots_adjust(
-                left=0.2, bottom=0.1, right=0.8, top=0.95, wspace=0.4, hspace=0.4
-            )
-            fig.set_size_inches(10, 7)
-            fig.savefig(
-                f"{MEAN_PLOTS_DIR}/{exp_name}_graph_{current_date}.png", dpi=100
-            )
+    # Plot saving.
+    os.makedirs(MEAN_PLOTS_DIR, exist_ok=True)
+    now = datetime.datetime.now()
+    current_date = (
+        f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
+    )
+    plt.subplots_adjust(
+        left=0.2, bottom=0.1, right=0.8, top=0.95, wspace=0.4, hspace=0.4
+    )
+    fig.set_size_inches(10, 7)
+    fig.savefig(f"{MEAN_PLOTS_DIR}/{exp_name}_graph_{current_date}.png", dpi=100)
 
 
 if __name__ == "__main__":
