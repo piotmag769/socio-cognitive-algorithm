@@ -16,18 +16,6 @@ ITERATION_INTERVAL = 50
 
 
 def plot_and_save_box_and_whiskers_graphs_with_best_results_for_some_iterations():
-    # limit on the fitness axis
-    # exp_limits = [
-    #     [44.5, 48],
-    #     [44.5, 48],
-    #     [1300, 2100],
-    #     [1300, 2100],
-    #     [1150, 1500],
-    #     [1150, 1500],
-    #     [350, 600],
-    #     [350, 600],
-    # ]
-
     exp_labels = []
     exp_iter = []
     exp_values = []
@@ -81,8 +69,6 @@ def plot_and_save_box_and_whiskers_graphs_with_best_results_for_some_iterations(
 
         ax.boxplot(exp_data, labels=iter_labels)
         ax.set_title(exp_name)
-        # print(f"{i + 1}/{len(exp_limits)}")
-        # ax.set_ylim(exp_limits[i])
 
         # Plot saving.
         os.makedirs(BOX_AND_WHISKERS_PLOTS_DIR, exist_ok=True)
