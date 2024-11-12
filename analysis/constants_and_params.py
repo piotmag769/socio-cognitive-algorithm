@@ -1,4 +1,5 @@
-from algorithm.agents import AgentWithTrust, BaseAgent, StrategyAgent
+from algorithm.agents import BaseAgent, StrategyAgent
+from algorithm.agents.strategy_based import AcceptStrategy, SendStrategy
 from problems import LABS
 
 OUTPUT_DIR = "./output"
@@ -13,6 +14,12 @@ NUMBER_OF_ITERATIONS = 998
 AGENTS_TO_TEST = [BaseAgent, StrategyAgent]
 # Change this to test for continuous problems.
 PROBLEMS_TO_TEST = [LABS]
+ACCEPT_STRATEGIES_TO_TEST = [
+    strategy for strategy in AcceptStrategy if strategy is not AcceptStrategy.Different
+]
+SEND_STRATEGIES_TO_TEST = [
+    strategy for strategy in SendStrategy if strategy is not SendStrategy.Outlying
+]
 
 # TODO: get rid of this and use `AGENTS_TO_TEST` and `PROBLEMS_TO_TEST` directly.
 # Experiment names order matters!!!

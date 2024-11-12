@@ -1,5 +1,6 @@
 from functools import cmp_to_key
 from math import ceil
+from typing import Optional
 
 from jmetal.algorithm.singleobjective import GeneticAlgorithm
 from jmetal.core.solution import Solution
@@ -8,7 +9,7 @@ from jmetal.core.solution import Solution
 class BaseAgent:
     POPULATION_PART_TO_SWAP = 0.1
 
-    def __init__(self, algorithm: GeneticAlgorithm):
+    def __init__(self, algorithm: GeneticAlgorithm, *args):
         self.algorithm = algorithm
 
     def get_solutions_to_share(self, agent_to_share_with) -> list[Solution]:

@@ -68,7 +68,8 @@ class StrategyAgent(BaseAgent):
         agent_sharing_the_solution,
     ):
         if self.accept_strategy is AcceptStrategy.Always:
-            self.algorithm.solutions = [shared_solutions + self.algorithm.solutions][
+            shared_solutions.extend(self.algorithm.solutions)
+            self.algorithm.solutions = shared_solutions[
                 : self.algorithm.population_size
             ]
 

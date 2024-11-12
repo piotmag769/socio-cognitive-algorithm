@@ -1,6 +1,8 @@
 import time
+
 from typing import Callable, Type, Optional
-from io import TextIOWrapper
+
+import pandas as pd
 
 from jmetal.algorithm.singleobjective import GeneticAlgorithm
 from jmetal.config import store
@@ -12,13 +14,14 @@ from jmetal.util.evaluator import Evaluator
 from jmetal.util.generator import Generator
 from jmetal.util.termination_criterion import TerminationCriterion
 
-from .agents import AcceptStrategy, BaseAgent, SendStrategy, StrategyAgent
+from .agents import AcceptStrategy, BaseAgent, SendStrategy
 from .exchange_logic import ExchangeMarket
 
 
 class Runner:
     def __init__(
         self,
+        output_file_path: str,
         agent_class: Callable[[GeneticAlgorithm], Type[BaseAgent]],
         agents_number: int,
         generations_per_swap: int,
@@ -32,61 +35,32 @@ class Runner:
         population_generator: Generator = store.default_generator,
         population_evaluator: Evaluator = store.default_evaluator,
         solution_comparator: Comparator = ObjectiveComparator(0),
-        accept_strategy: AcceptStrategy = None,
-        send_strategy: SendStrategy = None,
-        output_file: Optional[TextIOWrapper] = None,
+        accept_strategy: Optional[AcceptStrategy] = None,
+        send_strategy: Optional[SendStrategy] = None,
     ):
-        self.agents = (
-            [
-                agent_class(
-                    GeneticAlgorithm(
-                        problem,
-                        population_size,
-                        offspring_population_size,
-                        mutation,
-                        crossover,
-                        selection,
-                        termination_criterion,
-                        population_generator,
-                        population_evaluator,
-                        solution_comparator,
-                    ),
-                    send_strategy,
-                    accept_strategy,
-                )
-                for _ in range(agents_number)
-            ]
-            if agent_class is StrategyAgent
-            else [
-                agent_class(
-                    GeneticAlgorithm(
-                        problem,
-                        population_size,
-                        offspring_population_size,
-                        mutation,
-                        crossover,
-                        selection,
-                        termination_criterion,
-                        population_generator,
-                        population_evaluator,
-                        solution_comparator,
-                    )
-                )
-                for _ in range(agents_number)
-            ]
-        )
+        self.agents = [
+            agent_class(
+                GeneticAlgorithm(
+                    problem,
+                    population_size,
+                    offspring_population_size,
+                    mutation,
+                    crossover,
+                    selection,
+                    termination_criterion,
+                    population_generator,
+                    population_evaluator,
+                    solution_comparator,
+                ),
+                send_strategy,
+                accept_strategy,
+            )
+            for _ in range(agents_number)
+        ]
 
         self.exchange_market = ExchangeMarket(self.agents)
         self.generations_per_swap = generations_per_swap
-        self.output_file = output_file
-
-    def note_progress(self, agent, agent_id, gen_nr):
-        # If it's the first record, write column descriptors
-        if gen_nr + agent_id == 1:
-            self.output_file.write("generation,agent_id,score\n")
-        # Write down important statistics
-        score = agent.algorithm.result().objectives[0]
-        self.output_file.write(f"{gen_nr}, {agent_id}, {score}\n")
+        self.output_file_path = output_file_path
 
     def run_simulation(self):
         start_computing_time = time.time()
@@ -102,19 +76,25 @@ class Runner:
         for agent in self.agents:
             agent.algorithm.init_progress()
 
-        # TODO: update this to make sense with more compilcated criteria than number of evaluations
+        data_to_save = {"generation": [], "agent_id": [], "score": []}
+
+        # TODO: update this to make sense with more compilcated criteria than number of evaluations.
         number_of_generations = 0
         while not agent.algorithm.stopping_condition_is_met():
             number_of_generations += 1
             for agent_id, agent in enumerate(self.agents):
                 agent.algorithm.step()
                 agent.algorithm.update_progress()
-                if self.output_file is not None:
-                    self.note_progress(agent, agent_id, number_of_generations)
+                data_to_save["generation"].append(number_of_generations)
+                data_to_save["agent_id"].append(agent_id)
+                data_to_save["score"].append(agent.algorithm.result().objectives[0])
+
             if number_of_generations % self.generations_per_swap == 0:
                 self.exchange_market.exchange_information()
 
         total_computing_time = time.time() - start_computing_time
+
+        pd.DataFrame(data_to_save).to_csv(self.output_file_path, index=False)
 
         for agent in self.agents:
             agent.algorithm.start_computing_time = start_computing_time

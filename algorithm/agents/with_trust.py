@@ -11,7 +11,7 @@ class AgentWithTrust(BaseAgent):
     # Trust level equal to i means that i-th best solution will be shared - the lower, the better.
     MAX_TRUST_LEVEL = 0
 
-    def __init__(self, algorithm: GeneticAlgorithm):
+    def __init__(self, algorithm: GeneticAlgorithm, *args):
         super().__init__(algorithm)
         self.trust_level_map = {}
 
