@@ -23,13 +23,19 @@ agents = MULTI_CLASS_SETUP[0]
 send_strategies = MULTI_CLASS_SETUP[1]
 accept_strategies = MULTI_CLASS_SETUP[2]
 
-NUMBER_OF_RUNS = 1
+NUMBER_OF_RUNS = 5
 NUM_OF_VARS = 100
 
 
 def run_simulations_and_save_results():
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    now = datetime.datetime.now()
+    start_date = (
+            f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
+        )
+    custom_output = OUTPUT_DIR+"/"+start_date
+    
     for _ in range(NUMBER_OF_RUNS):
         now = datetime.datetime.now()
         current_date = (
@@ -57,8 +63,9 @@ def run_simulations_and_save_results():
             #             agent_class, problem, output_file_path, None, None
             #         )
 
-            ### MULTI AGENT CLASS SIMULATION
-            output_file_path = f"{OUTPUT_DIR}/CustomMultiClass_{problem.name()}_{current_date}.csv"
+            ### MULTI AGENT CLASS SIMULATION            
+            os.makedirs(custom_output, exist_ok=True)
+            output_file_path = f"{custom_output}/CustomMultiClass_{problem.name()}_{current_date}.csv"
             run_single_simulation(
                 agents, problem, output_file_path, accept_strategies, send_strategies
             )
