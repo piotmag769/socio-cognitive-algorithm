@@ -1,6 +1,6 @@
 import time
 
-from typing import Callable, Type, Optional
+from typing import Callable, Type, Optional, List
 
 import pandas as pd
 
@@ -14,16 +14,17 @@ from jmetal.util.evaluator import Evaluator
 from jmetal.util.generator import Generator
 from jmetal.util.termination_criterion import TerminationCriterion
 
-from .agents import AcceptStrategy, BaseAgent, SendStrategy
+from .agents import AcceptStrategy, BaseAgent, SendStrategy, StrategyAgent
 from .exchange_logic import ExchangeMarket
 
+from copy import deepcopy
 
 class Runner:
     def __init__(
         self,
         output_file_path: str,
-        agent_class: Callable[[GeneticAlgorithm], Type[BaseAgent]],
-        agents_number: int,
+        agent_class: Callable[[GeneticAlgorithm], Type[BaseAgent]] | List[Callable[[GeneticAlgorithm], Type[BaseAgent]]],
+        agents_number: Optional[int],
         generations_per_swap: int,
         problem: Problem,
         population_size: int,
@@ -35,28 +36,53 @@ class Runner:
         population_generator: Generator = store.default_generator,
         population_evaluator: Evaluator = store.default_evaluator,
         solution_comparator: Comparator = ObjectiveComparator(0),
-        accept_strategy: Optional[AcceptStrategy] = None,
-        send_strategy: Optional[SendStrategy] = None,
+        accept_strategy: Optional[AcceptStrategy | List[AcceptStrategy]] = None,
+        send_strategy: Optional[SendStrategy | List[AcceptStrategy]] = None,
     ):
-        self.agents = [
-            agent_class(
-                GeneticAlgorithm(
-                    problem,
-                    population_size,
-                    offspring_population_size,
-                    mutation,
-                    crossover,
-                    selection,
-                    termination_criterion,
-                    population_generator,
-                    population_evaluator,
-                    solution_comparator,
-                ),
-                send_strategy,
-                accept_strategy,
-            )
-            for _ in range(agents_number)
-        ]
+        # In case of a Uniform Agent Class simulation
+        if callable(agent_class):
+            self.is_multi_class = False
+            self.agents = [
+                agent_class(
+                    GeneticAlgorithm(
+                        problem,
+                        population_size,
+                        offspring_population_size,
+                        mutation,
+                        crossover,
+                        selection,
+                        termination_criterion,
+                        population_generator,
+                        population_evaluator,
+                        solution_comparator,
+                    ),
+                    send_strategy,
+                    accept_strategy,
+                )
+                for _ in range(agents_number)
+            ]
+        # In case of a Multiple Agent Class simulation (lists of Agent Classes and Send/Accept Strategies were passed as args)
+        elif isinstance(agent_class, list):
+            self.is_multi_class = True
+            self.agents = [
+                agent_class[agent_nr](
+                    GeneticAlgorithm(
+                        problem,
+                        population_size,
+                        offspring_population_size,
+                        mutation,
+                        crossover,
+                        selection,
+                        termination_criterion,
+                        population_generator,
+                        population_evaluator,
+                        solution_comparator,
+                    ),
+                    send_strategy[agent_nr],
+                    accept_strategy[agent_nr],
+                )
+                for agent_nr in range(len(agent_class))
+            ]
 
         self.exchange_market = ExchangeMarket(self.agents)
         self.generations_per_swap = generations_per_swap
@@ -76,7 +102,7 @@ class Runner:
         for agent in self.agents:
             agent.algorithm.init_progress()
 
-        data_to_save = {"generation": [], "agent_id": [], "score": []}
+        data_to_save = {"generation": [], "agent_id": [], "score": [], "class": []}
 
         # TODO: update this to make sense with more compilcated criteria than number of evaluations.
         number_of_generations = 0
@@ -88,7 +114,11 @@ class Runner:
                 data_to_save["generation"].append(number_of_generations)
                 data_to_save["agent_id"].append(agent_id)
                 data_to_save["score"].append(agent.algorithm.result().objectives[0])
-
+                if isinstance(agent, StrategyAgent):
+                    data_to_save["class"].append(type(agent).__name__ + "_" + agent.accept_strategy.name + "_" + agent.send_strategy.name)
+                else:
+                    data_to_save["class"].append(type(agent).__name__)
+                    
             if number_of_generations % self.generations_per_swap == 0:
                 self.exchange_market.exchange_information()
 
