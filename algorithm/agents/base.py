@@ -35,6 +35,9 @@ class BaseAgent:
             : self.algorithm.population_size
         ]
 
+    def remove_solutions(self, solutions):
+        self.algorithm.solutions = [solution for solution in self.algorithm.solutions if solution not in solutions]
+
     def __eq__(self, other) -> bool:
         # Two different objects are always unequal.
         return id(self) == id(other)

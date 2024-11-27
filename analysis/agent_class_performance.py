@@ -14,8 +14,8 @@ from .constants_and_params import (
 ITERATION_INTERVAL = 10
 
 # Script Params
-data_dir = OUTPUT_DIR + "/2024_11_24_19_31_4"  # Make sure that you choose a dir that has experiments with the same agent setup
-exp_name = "Griewank_100var_5run_1Extractor_2Tryhard_2Filter_6Creative" # Title based on Problem, Nr of runs and Agent Combination
+data_dir = OUTPUT_DIR + "/2024_11_27_9_1_51"  # Make sure that you choose a dir that has experiments with the same agent setup
+exp_name = "Griewank_MIGRATION_100var_5run_5Creative_3Trust_1Perf_1Solo" # Title based on Problem, Nr of runs and Agent Combination
 
 
 def plot_and_save_average_agent_class_performance_in_training():

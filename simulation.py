@@ -25,6 +25,7 @@ accept_strategies = MULTI_CLASS_SETUP[2]
 
 NUMBER_OF_RUNS = 5
 NUM_OF_VARS = 100
+MIGRATION = True
 
 
 def run_simulations_and_save_results():
@@ -94,6 +95,7 @@ def run_single_simulation(
         termination_criterion=StoppingByEvaluations(max_evaluations=10000),
         send_strategy=send_strategy,
         accept_strategy=accept_strategy,
+        migration = MIGRATION
     )
     runner.run_simulation()
 

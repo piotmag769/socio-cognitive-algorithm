@@ -38,6 +38,7 @@ class Runner:
         solution_comparator: Comparator = ObjectiveComparator(0),
         accept_strategy: Optional[AcceptStrategy | List[AcceptStrategy]] = None,
         send_strategy: Optional[SendStrategy | List[AcceptStrategy]] = None,
+        migration: bool = False
     ):
         # In case of a Uniform Agent Class simulation
         if callable(agent_class):
@@ -84,7 +85,7 @@ class Runner:
                 for agent_nr in range(len(agent_class))
             ]
 
-        self.exchange_market = ExchangeMarket(self.agents)
+        self.exchange_market = ExchangeMarket(self.agents, migration)
         self.generations_per_swap = generations_per_swap
         self.output_file_path = output_file_path
 
