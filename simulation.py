@@ -94,11 +94,11 @@ def run_single_simulation(
         population_size=20,
         offspring_population_size=10,
         ### For discrete problems.
-        # mutation=BitFlipMutation(0.5),
-        # crossover=SPXCrossover(0.5),
+        mutation=BitFlipMutation(0.5),
+        crossover=SPXCrossover(0.5),
         ### For continuous problems.
-        mutation=SimpleRandomMutation(0.5),
-        crossover=SBXCrossover(0.5),
+        # mutation=SimpleRandomMutation(0.5),
+        # crossover=SBXCrossover(0.5),
         ###
         selection=BinaryTournamentSelection(),
         termination_criterion=StoppingByEvaluations(max_evaluations=100000),

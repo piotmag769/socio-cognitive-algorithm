@@ -8,6 +8,7 @@ import numpy as np
 
 from jmetal.algorithm.singleobjective import GeneticAlgorithm
 from jmetal.core.solution import Solution
+from jmetal.core.problem import BinaryProblem
 
 from .base import BaseAgent
 
@@ -105,17 +106,28 @@ class StrategyAgent(BaseAgent):
             ]
 
     # FIXME: fix for discrete problems.
-    # Returns solutions sorted by the dot product of it's variables and the mean variables of all the solutions
+    # Returns solutions sorted by the dot product of its variables and the mean variables of all the solutions
     # in an ascending order.
     def rank_outliers(self, new_solutions=None):
         if new_solutions is not None:
             solutions = self.algorithm.solutions + new_solutions
         else:
             solutions = self.algorithm.solutions
-        variables_mean = np.array([solution.variables for solution in solutions]).mean(
-            axis=0
-        )
-        ranked_sol = sorted(
-            solutions, key=lambda solution: np.dot(solution.variables, variables_mean)
-        )
+
+        if isinstance(self.algorithm.problem, BinaryProblem):
+            variables_mean = np.array(
+                [solution.variables[0] for solution in solutions]
+            ).mean(axis=0)
+            ranked_sol = sorted(
+                solutions,
+                key=lambda solution: np.dot(solution.variables[0], variables_mean),
+            )
+        else:
+            variables_mean = np.array(
+                [solution.variables for solution in solutions]
+            ).mean(axis=0)
+            ranked_sol = sorted(
+                solutions,
+                key=lambda solution: np.dot(solution.variables, variables_mean),
+            )
         return ranked_sol
