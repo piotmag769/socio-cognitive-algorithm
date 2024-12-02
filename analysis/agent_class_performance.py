@@ -16,9 +16,9 @@ BEST_TO_PLOT = 5
 
 # Script Params
 data_dir = (
-    OUTPUT_DIR + "/2024_12_2_3_2_5"
+    OUTPUT_DIR + "/2024_12_2_4_14_36"
 )  # Make sure that you choose a dir that has experiments with the same agent setup
-exp_name = "Griewank_MIGRATION_100var_5run_AllDifferent_LONG"  # Title based on Problem, Nr of runs and Agent Combination
+exp_name = "Schaffer_MIGRATION_100var_5run_AllDifferent_LONG"  # Title based on Problem, Nr of runs and Agent Combination
 
 
 def plot_and_save_average_agent_class_performance_in_training():
@@ -59,15 +59,15 @@ def plot_and_save_average_agent_class_performance_in_training():
 
     mean_std_final_agent_type_datas.sort(key=lambda x: x[2])
 
-    for i in range(len(mean_std_final_agent_type_datas)):
+    for i in range(BEST_TO_PLOT):
         mean_data, std_data, final_y, agent_type = mean_std_final_agent_type_datas[i]
         ax.plot(iter_labels, mean_data, label=agent_type)
-        # ax.fill_between(
-        #     iter_labels, mean_data - std_data, mean_data + std_data, alpha=0.2
-        # )
+        ax.fill_between(
+            iter_labels, mean_data - std_data, mean_data + std_data, alpha=0.2
+        )
 
         plt.annotate(
-            f"{final_y:.0f}",  # Annotate with the final value (formatted to 2 decimals)
+            f"{final_y:.2f}",  # Annotate with the final value (formatted to 2 decimals)
             (iter_labels[-1], final_y),  # The point to annotate
             bbox=dict(boxstyle="round,pad=0.3", edgecolor="black", facecolor="white"),
             textcoords="offset points",  # Position the text relative to the point
