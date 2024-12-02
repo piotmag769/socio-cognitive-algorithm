@@ -13,8 +13,12 @@ SIGNIFICANCE_LEVEL = 0.05
 NUMBER_OF_ITERATIONS = 9998  # 9998 for 100000 iterations, 998 for 10000 iterations
 
 AGENTS_TO_TEST = [AgentWithTrust, StrategyAgent]
-# Change this to test for continuous problems.
-PROBLEMS_TO_TEST = [LABS]
+# TODO: add Ackley and other binary problem
+PROBLEMS_TO_TEST = [
+    LABS,
+    ExpandedSchaffer,
+    Griewank,
+]
 ACCEPT_STRATEGIES_TO_TEST = [
     strategy
     for strategy in AcceptStrategy  # if strategy is not AcceptStrategy.Different

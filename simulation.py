@@ -2,11 +2,11 @@ from copy import deepcopy
 import datetime, os
 
 from jmetal.operator import BinaryTournamentSelection
+from jmetal.core.problem import BinaryProblem
 
 from jmetal.operator.crossover import SBXCrossover, SPXCrossover
 from jmetal.operator.mutation import SimpleRandomMutation, BitFlipMutation
 from jmetal.util.termination_criterion import StoppingByEvaluations
-from jmetal.algorithm.singleobjective import GeneticAlgorithm
 
 from algorithm import (
     Runner,
@@ -85,6 +85,15 @@ def run_single_simulation(
     agent_class, problem, output_file_path, accept_strategy, send_strategy
 ):
     print(output_file_path)
+    mutation = (
+        BitFlipMutation(0.5)
+        if isinstance(problem, BinaryProblem)
+        else SimpleRandomMutation(0.5)
+    )
+    crossover = (
+        SPXCrossover(0.5) if isinstance(problem, BinaryProblem) else SBXCrossover(0.5)
+    )
+
     runner = Runner(
         output_file_path=output_file_path,
         agent_class=agent_class,
@@ -93,13 +102,8 @@ def run_single_simulation(
         problem=deepcopy(problem),
         population_size=20,
         offspring_population_size=10,
-        ### For discrete problems.
-        mutation=BitFlipMutation(0.5),
-        crossover=SPXCrossover(0.5),
-        ### For continuous problems.
-        # mutation=SimpleRandomMutation(0.5),
-        # crossover=SBXCrossover(0.5),
-        ###
+        mutation=mutation,
+        crossover=crossover,
         selection=BinaryTournamentSelection(),
         termination_criterion=StoppingByEvaluations(max_evaluations=100000),
         send_strategy=send_strategy,
