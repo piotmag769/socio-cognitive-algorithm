@@ -19,11 +19,15 @@ from .exchange_logic import ExchangeMarket
 
 from copy import deepcopy
 
+
 class Runner:
     def __init__(
         self,
         output_file_path: str,
-        agent_class: Callable[[GeneticAlgorithm], Type[BaseAgent]] | List[Callable[[GeneticAlgorithm], Type[BaseAgent]]],
+        agent_class: (
+            Callable[[GeneticAlgorithm], Type[BaseAgent]]
+            | List[Callable[[GeneticAlgorithm], Type[BaseAgent]]]
+        ),
         agents_number: Optional[int],
         generations_per_swap: int,
         problem: Problem,
@@ -38,7 +42,7 @@ class Runner:
         solution_comparator: Comparator = ObjectiveComparator(0),
         accept_strategy: Optional[AcceptStrategy | List[AcceptStrategy]] = None,
         send_strategy: Optional[SendStrategy | List[AcceptStrategy]] = None,
-        migration: bool = False
+        migration: bool = False,
     ):
         # In case of a Uniform Agent Class simulation
         if callable(agent_class):
@@ -116,10 +120,16 @@ class Runner:
                 data_to_save["agent_id"].append(agent_id)
                 data_to_save["score"].append(agent.algorithm.result().objectives[0])
                 if isinstance(agent, StrategyAgent):
-                    data_to_save["class"].append(type(agent).__name__ + "_" + agent.accept_strategy.name + "_" + agent.send_strategy.name)
+                    data_to_save["class"].append(
+                        type(agent).__name__
+                        + "_"
+                        + agent.accept_strategy.name
+                        + "_"
+                        + agent.send_strategy.name
+                    )
                 else:
                     data_to_save["class"].append(type(agent).__name__)
-                    
+
             if number_of_generations % self.generations_per_swap == 0:
                 self.exchange_market.exchange_information()
 

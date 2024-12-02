@@ -8,14 +8,21 @@ from jmetal.operator.mutation import SimpleRandomMutation, BitFlipMutation
 from jmetal.util.termination_criterion import StoppingByEvaluations
 from jmetal.algorithm.singleobjective import GeneticAlgorithm
 
-from algorithm import Runner, StrategyAgent, AgentWithTrust, AcceptStrategy, SendStrategy, BaseAgent
+from algorithm import (
+    Runner,
+    StrategyAgent,
+    AgentWithTrust,
+    AcceptStrategy,
+    SendStrategy,
+    BaseAgent,
+)
 from analysis.constants_and_params import (
     ACCEPT_STRATEGIES_TO_TEST,
     AGENTS_TO_TEST,
     OUTPUT_DIR,
     PROBLEMS_TO_TEST,
     SEND_STRATEGIES_TO_TEST,
-    MULTI_CLASS_SETUP
+    MULTI_CLASS_SETUP,
 )
 
 # Multi class setup parsing
@@ -33,18 +40,18 @@ def run_simulations_and_save_results():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     now = datetime.datetime.now()
     start_date = (
-            f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
-        )
-    custom_output = OUTPUT_DIR+"/"+start_date
-    
+        f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
+    )
+    custom_output = OUTPUT_DIR + "/" + start_date
+
     for _ in range(NUMBER_OF_RUNS):
         now = datetime.datetime.now()
         current_date = (
             f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
         )
-        
+
         for problem in [problem_type(NUM_OF_VARS) for problem_type in PROBLEMS_TO_TEST]:
-            
+
             ### SINGLE AGENT CLASS SIMULATION
             # for agent_class in AGENTS_TO_TEST:
             #     if agent_class is StrategyAgent:
@@ -64,9 +71,11 @@ def run_simulations_and_save_results():
             #             agent_class, problem, output_file_path, None, None
             #         )
 
-            ### MULTI AGENT CLASS SIMULATION            
+            ### MULTI AGENT CLASS SIMULATION
             os.makedirs(custom_output, exist_ok=True)
-            output_file_path = f"{custom_output}/CustomMultiClass_{problem.name()}_{current_date}.csv"
+            output_file_path = (
+                f"{custom_output}/CustomMultiClass_{problem.name()}_{current_date}.csv"
+            )
             run_single_simulation(
                 agents, problem, output_file_path, accept_strategies, send_strategies
             )
@@ -95,7 +104,7 @@ def run_single_simulation(
         termination_criterion=StoppingByEvaluations(max_evaluations=10000),
         send_strategy=send_strategy,
         accept_strategy=accept_strategy,
-        migration = MIGRATION
+        migration=MIGRATION,
     )
     runner.run_simulation()
 

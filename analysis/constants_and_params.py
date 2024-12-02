@@ -16,10 +16,11 @@ AGENTS_TO_TEST = [AgentWithTrust, StrategyAgent]
 # Change this to test for continuous problems.
 PROBLEMS_TO_TEST = [Griewank]
 ACCEPT_STRATEGIES_TO_TEST = [
-    strategy for strategy in AcceptStrategy # if strategy is not AcceptStrategy.Different
+    strategy
+    for strategy in AcceptStrategy  # if strategy is not AcceptStrategy.Different
 ]
 SEND_STRATEGIES_TO_TEST = [
-    strategy for strategy in SendStrategy # if strategy is not SendStrategy.Outlying
+    strategy for strategy in SendStrategy  # if strategy is not SendStrategy.Outlying
 ]
 
 # TODO: get rid of this and use `AGENTS_TO_TEST` and `PROBLEMS_TO_TEST` directly.
@@ -45,7 +46,7 @@ agents = []
 send_strategies = []
 accept_strategies = []
 
-''' 5Creative_3Trust_1Perf_1Solo '''
+""" 5Creative_3Trust_1Perf_1Solo """
 # for _ in range(3):  # Trust Agents
 #     agents.append(AgentWithTrust)
 #     send_strategies.append(None)
@@ -63,7 +64,7 @@ accept_strategies = []
 #     send_strategies.append(SendStrategy.Best)
 #     accept_strategies.append(AcceptStrategy.Better)
 
-''' 1Extractor_2Tryhard_2Filter_6Creative '''
+""" 1Extractor_2Tryhard_2Filter_6Creative """
 for _ in range(1):
     agents.append(StrategyAgent)  # Extractor
     send_strategies.append(SendStrategy.Dont)

@@ -34,10 +34,6 @@ class ExchangeMarket:
                 paired_agent.remove_solutions(paired_agent_shared_solutions)
                 agent.remove_solutions(agent_shared_solutions)
 
-            agent.use_shared_solutions(
-                paired_agent_shared_solutions, paired_agent
-            )
-            
-            paired_agent.use_shared_solutions(
-                agent_shared_solutions, agent
-            )
+            agent.use_shared_solutions(paired_agent_shared_solutions, paired_agent)
+
+            paired_agent.use_shared_solutions(agent_shared_solutions, agent)
