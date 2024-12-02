@@ -101,7 +101,7 @@ def run_single_simulation(
         crossover=SBXCrossover(0.5),
         ###
         selection=BinaryTournamentSelection(),
-        termination_criterion=StoppingByEvaluations(max_evaluations=10000),
+        termination_criterion=StoppingByEvaluations(max_evaluations=100000),
         send_strategy=send_strategy,
         accept_strategy=accept_strategy,
         migration=MIGRATION,

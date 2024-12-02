@@ -10,7 +10,7 @@ MEAN_PLOTS_DIR = f"{PLOTS_DIR}/mean"
 MULTI_CLASS_PLOTS_DIR = f"{PLOTS_DIR}/multi_class"
 
 SIGNIFICANCE_LEVEL = 0.05
-NUMBER_OF_ITERATIONS = 998
+NUMBER_OF_ITERATIONS = 9998  # 9998 for 100000 iterations, 998 for 10000 iterations
 
 AGENTS_TO_TEST = [AgentWithTrust, StrategyAgent]
 # Change this to test for continuous problems.
@@ -64,22 +64,29 @@ accept_strategies = []
 #     send_strategies.append(SendStrategy.Best)
 #     accept_strategies.append(AcceptStrategy.Better)
 
-""" 1Extractor_2Tryhard_2Filter_6Creative """
-for _ in range(1):
-    agents.append(StrategyAgent)  # Extractor
-    send_strategies.append(SendStrategy.Dont)
-    accept_strategies.append(AcceptStrategy.Better)
-for _ in range(2):
-    agents.append(StrategyAgent)  # Tryhard
-    send_strategies.append(SendStrategy.Best)
-    accept_strategies.append(AcceptStrategy.Always)
-for _ in range(2):
-    agents.append(StrategyAgent)  # Filter
-    send_strategies.append(SendStrategy.Best)
-    accept_strategies.append(AcceptStrategy.Different)
-for _ in range(6):
-    agents.append(StrategyAgent)  # Creative
-    send_strategies.append(SendStrategy.Outlying)
-    accept_strategies.append(AcceptStrategy.Different)
+# """ 1Extractor_2Tryhard_2Filter_6Creative """
+# for _ in range(1):
+#     agents.append(StrategyAgent)  # Extractor
+#     send_strategies.append(SendStrategy.Dont)
+#     accept_strategies.append(AcceptStrategy.Better)
+# for _ in range(2):
+#     agents.append(StrategyAgent)  # Tryhard
+#     send_strategies.append(SendStrategy.Best)
+#     accept_strategies.append(AcceptStrategy.Always)
+# for _ in range(2):
+#     agents.append(StrategyAgent)  # Filter
+#     send_strategies.append(SendStrategy.Best)
+#     accept_strategies.append(AcceptStrategy.Different)
+# for _ in range(6):
+#     agents.append(StrategyAgent)  # Creative
+#     send_strategies.append(SendStrategy.Outlying)
+#     accept_strategies.append(AcceptStrategy.Different)
+
+"""All different mixes."""
+for send_strategy in SendStrategy:
+    for accept_strategy in AcceptStrategy:
+        agents.append(StrategyAgent)
+        send_strategies.append(send_strategy)
+        accept_strategies.append(accept_strategy)
 
 MULTI_CLASS_SETUP = [agents, send_strategies, accept_strategies]

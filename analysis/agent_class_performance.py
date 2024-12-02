@@ -11,13 +11,14 @@ from .constants_and_params import (
     MULTI_CLASS_PLOTS_DIR,
 )
 
-ITERATION_INTERVAL = 10
+ITERATION_INTERVAL = 100
+BEST_TO_PLOT = 5
 
 # Script Params
 data_dir = (
-    OUTPUT_DIR + "/2024_11_27_9_1_51"
+    OUTPUT_DIR + "/2024_12_2_3_2_5"
 )  # Make sure that you choose a dir that has experiments with the same agent setup
-exp_name = "Griewank_MIGRATION_100var_5run_5Creative_3Trust_1Perf_1Solo"  # Title based on Problem, Nr of runs and Agent Combination
+exp_name = "Griewank_MIGRATION_100var_5run_AllDifferent_LONG"  # Title based on Problem, Nr of runs and Agent Combination
 
 
 def plot_and_save_average_agent_class_performance_in_training():
@@ -36,11 +37,10 @@ def plot_and_save_average_agent_class_performance_in_training():
     fig, ax = plt.subplots(1, 1)
 
     steps_count = df["generation"].max() // ITERATION_INTERVAL
-    iter_labels = np.arange(1, df["generation"].max(), ITERATION_INTERVAL)
-    final_ys = []
+    iter_labels = np.arange(1, df["generation"].max() + 1, ITERATION_INTERVAL)
 
+    mean_std_final_agent_type_datas = []
     for agent_type in df["class"].unique():
-
         mean_data = []
         std_data = []
 
@@ -53,15 +53,19 @@ def plot_and_save_average_agent_class_performance_in_training():
             mean_data.append(iter_exp_values["score"].values.mean(axis=0))
             std_data.append(iter_exp_values["score"].values.std(axis=0, ddof=1))
 
-        mean_data = np.array(mean_data)
-        std_data = np.array(std_data)
-        ax.plot(iter_labels, mean_data, label=agent_type)
-        ax.fill_between(
-            iter_labels, mean_data - std_data, mean_data + std_data, alpha=0.2
+        mean_std_final_agent_type_datas.append(
+            (np.array(mean_data), np.array(std_data), mean_data[-1], agent_type)
         )
-        final_ys.append(mean_data[-1])
 
-    for i, final_y in enumerate(sorted(final_ys, reverse=True)):
+    mean_std_final_agent_type_datas.sort(key=lambda x: x[2])
+
+    for i in range(len(mean_std_final_agent_type_datas)):
+        mean_data, std_data, final_y, agent_type = mean_std_final_agent_type_datas[i]
+        ax.plot(iter_labels, mean_data, label=agent_type)
+        # ax.fill_between(
+        #     iter_labels, mean_data - std_data, mean_data + std_data, alpha=0.2
+        # )
+
         plt.annotate(
             f"{final_y:.0f}",  # Annotate with the final value (formatted to 2 decimals)
             (iter_labels[-1], final_y),  # The point to annotate
