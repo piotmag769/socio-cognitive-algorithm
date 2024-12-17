@@ -6,8 +6,9 @@ from collections import defaultdict
 
 
 class ExchangeMarket:
-    def __init__(self, agents: Sequence[Type[BaseAgent]]):
+    def __init__(self, agents: Sequence[Type[BaseAgent]], migration: bool = False):
         self.agents = agents
+        self.migration = migration
 
     def exchange_information(self):
         was_paired = defaultdict(bool)
@@ -26,9 +27,13 @@ class ExchangeMarket:
             paired_agent = random.choice(not_paired_agents)
             was_paired[paired_agent] = True
 
-            agent.use_shared_solutions(
-                paired_agent.get_solutions_to_share(agent), paired_agent
-            )
-            paired_agent.use_shared_solutions(
-                agent.get_solutions_to_share(paired_agent), agent
-            )
+            paired_agent_shared_solutions = paired_agent.get_solutions_to_share(agent)
+            agent_shared_solutions = agent.get_solutions_to_share(paired_agent)
+
+            if self.migration:
+                paired_agent.remove_solutions(paired_agent_shared_solutions)
+                agent.remove_solutions(agent_shared_solutions)
+
+            agent.use_shared_solutions(paired_agent_shared_solutions, paired_agent)
+
+            paired_agent.use_shared_solutions(agent_shared_solutions, agent)

@@ -96,6 +96,7 @@ class LABS(BinaryProblem):
         return cls.__name__
 
 
+# TODO: optimize with numpy, the speed is terrible.
 def energy_function(sequence):
     energy = 0
     mapped_seq = list(map(lambda x: -1 if x is True else 1, sequence))
