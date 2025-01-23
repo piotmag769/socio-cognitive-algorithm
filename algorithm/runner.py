@@ -14,10 +14,10 @@ from jmetal.util.evaluator import Evaluator
 from jmetal.util.generator import Generator
 from jmetal.util.termination_criterion import TerminationCriterion
 
+from algorithm.agents.strategy_based import TrustMechanism
+
 from .agents import AcceptStrategy, BaseAgent, SendStrategy, StrategyAgent
 from .exchange_logic import ExchangeMarket
-
-from copy import deepcopy
 
 
 class Runner:
@@ -42,8 +42,10 @@ class Runner:
         solution_comparator: Comparator = ObjectiveComparator(0),
         accept_strategy: Optional[AcceptStrategy | List[AcceptStrategy]] = None,
         send_strategy: Optional[SendStrategy | List[AcceptStrategy]] = None,
+        trust_mechanism: Optional[TrustMechanism] = None,
         migration: bool = False,
     ):
+        global_trust = {}
         # In case of a Uniform Agent Class simulation
         if callable(agent_class):
             self.is_multi_class = False
@@ -63,6 +65,8 @@ class Runner:
                     ),
                     send_strategy,
                     accept_strategy,
+                    trust_mechanism,
+                    global_trust,
                 )
                 for _ in range(agents_number)
             ]
@@ -85,11 +89,13 @@ class Runner:
                     ),
                     send_strategy[agent_nr],
                     accept_strategy[agent_nr],
+                    trust_mechanism,
+                    global_trust,
                 )
                 for agent_nr in range(len(agent_class))
             ]
 
-        self.exchange_market = ExchangeMarket(self.agents, migration)
+        self.exchange_market = ExchangeMarket(self.agents, global_trust, migration)
         self.generations_per_swap = generations_per_swap
         self.output_file_path = output_file_path
 

@@ -23,6 +23,7 @@ from analysis.constants_and_params import (
     PROBLEMS_TO_TEST,
     SEND_STRATEGIES_TO_TEST,
     MULTI_CLASS_SETUP,
+    TRUST_MECHANISM,
 )
 
 # Multi class setup parsing
@@ -32,11 +33,10 @@ accept_strategies = MULTI_CLASS_SETUP[2]
 
 NUMBER_OF_RUNS = 5
 NUM_OF_VARS = 100
-MIGRATION = True
+MIGRATION = False
 
 
 def run_simulations_and_save_results():
-
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     now = datetime.datetime.now()
     start_date = (
@@ -82,7 +82,11 @@ def run_simulations_and_save_results():
 
 
 def run_single_simulation(
-    agent_class, problem, output_file_path, accept_strategy, send_strategy
+    agent_class,
+    problem,
+    output_file_path,
+    accept_strategy,
+    send_strategy,
 ):
     print(output_file_path)
     mutation = (
@@ -109,6 +113,7 @@ def run_single_simulation(
         send_strategy=send_strategy,
         accept_strategy=accept_strategy,
         migration=MIGRATION,
+        trust_mechanism=TRUST_MECHANISM,
     )
     runner.run_simulation()
 

@@ -16,9 +16,9 @@ BEST_TO_PLOT = 5
 
 # Script Params
 data_dir = (
-    OUTPUT_DIR + "/2024_12_2_4_14_36"
+    OUTPUT_DIR + "/2025_LABS_Local"
 )  # Make sure that you choose a dir that has experiments with the same agent setup
-exp_name = "Schaffer_MIGRATION_100var_5run_AllDifferent_LONG"  # Title based on Problem, Nr of runs and Agent Combination
+exp_name = "LABS_NO_MIGRATION_100var_5run_AllDifferent_LONG_TRUST_LOCAL_LOCAL"  # Title based on Problem, Nr of runs and Agent Combination
 
 
 def plot_and_save_average_agent_class_performance_in_training():

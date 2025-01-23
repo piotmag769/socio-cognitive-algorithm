@@ -1,5 +1,5 @@
 from algorithm.agents import StrategyAgent, AgentWithTrust
-from algorithm.agents.strategy_based import AcceptStrategy, SendStrategy
+from algorithm.agents.strategy_based import AcceptStrategy, SendStrategy, TrustMechanism
 from problems import LABS, ExpandedSchaffer, Griewank
 
 OUTPUT_DIR = "./output"
@@ -26,6 +26,7 @@ ACCEPT_STRATEGIES_TO_TEST = [
 SEND_STRATEGIES_TO_TEST = [
     strategy for strategy in SendStrategy  # if strategy is not SendStrategy.Outlying
 ]
+TRUST_MECHANISM = TrustMechanism.Local
 
 # TODO: get rid of this and use `AGENTS_TO_TEST` and `PROBLEMS_TO_TEST` directly.
 # Experiment names order matters!!!
@@ -68,7 +69,7 @@ accept_strategies = []
 #     send_strategies.append(SendStrategy.Best)
 #     accept_strategies.append(AcceptStrategy.Better)
 
-# """ 1Extractor_2Tryhard_2Filter_6Creative """
+""" 1Extractor_2Tryhard_2Filter_6Creative """
 # for _ in range(1):
 #     agents.append(StrategyAgent)  # Extractor
 #     send_strategies.append(SendStrategy.Dont)

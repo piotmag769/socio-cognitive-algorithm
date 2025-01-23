@@ -6,9 +6,15 @@ from collections import defaultdict
 
 
 class ExchangeMarket:
-    def __init__(self, agents: Sequence[Type[BaseAgent]], migration: bool = False):
+    def __init__(
+        self,
+        agents: Sequence[Type[BaseAgent]],
+        global_trust: dict[BaseAgent, int],
+        migration: bool = False,
+    ):
         self.agents = agents
         self.migration = migration
+        self.global_trust = global_trust
 
     def exchange_information(self):
         was_paired = defaultdict(bool)
