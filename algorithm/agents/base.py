@@ -5,9 +5,10 @@ from typing import Optional
 from jmetal.algorithm.singleobjective import GeneticAlgorithm
 from jmetal.core.solution import Solution
 
-
 class BaseAgent:
     POPULATION_PART_TO_SWAP = 0.1
+    last_shared_solutions = None
+    id = -1,
 
     def __init__(self, algorithm: GeneticAlgorithm, *args):
         self.algorithm = algorithm
@@ -17,7 +18,6 @@ class BaseAgent:
         solutions_to_share = ceil(
             number_of_solutions * BaseAgent.POPULATION_PART_TO_SWAP
         )
-
         return self.algorithm.solutions[0:solutions_to_share]
 
     def use_shared_solutions(

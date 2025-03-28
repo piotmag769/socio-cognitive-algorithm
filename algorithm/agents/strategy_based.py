@@ -14,7 +14,6 @@ from jmetal.core.problem import BinaryProblem
 
 from .base import BaseAgent
 
-
 class SendStrategy(Enum):
     Best = 1
     Average = 2
@@ -54,11 +53,19 @@ class StrategyAgent(BaseAgent):
         accept_strategy: AcceptStrategy,
         trust_mechanism: Optional[TrustMechanism],
         trust: dict[BaseAgent, int],
+        starting_trust: Optional[int] = MAX_TRUST_LEVEL,
+        no_send_penalty: Optional[int] = 0,
+        part_to_swap: Optional[float] = 0.1,
+        id: int = -1,
     ):
         self.algorithm = algorithm
         self.send_strategy = send_strategy
         self.accept_strategy = accept_strategy
-
+        self.starting_trust = starting_trust
+        self.no_send_penalty = no_send_penalty
+        self.part_to_swap = part_to_swap
+        self.id = id
+        
         if trust_mechanism is None:
             self.trust = None
         elif trust_mechanism is TrustMechanism.Global:
@@ -71,12 +78,12 @@ class StrategyAgent(BaseAgent):
     def get_solutions_to_share(self, agent_to_share_with) -> list[Solution]:
         number_of_solutions = len(self.algorithm.solutions)
         solutions_to_share = ceil(
-            number_of_solutions * self.__class__.POPULATION_PART_TO_SWAP
+            number_of_solutions * self.part_to_swap
         )
 
         if self.trust is not None:
             if agent_to_share_with not in self.trust:
-                self.trust[agent_to_share_with] = self.__class__.MAX_TRUST_LEVEL
+                self.trust[agent_to_share_with] = self.starting_trust
 
             trust_lvl = self.trust[agent_to_share_with]
 
@@ -89,39 +96,43 @@ class StrategyAgent(BaseAgent):
             index_of_best_solution_to_share = 0
 
         if self.send_strategy is SendStrategy.Best:
-            return self.algorithm.solutions[
+            chosen_solutions = self.algorithm.solutions[
                 index_of_best_solution_to_share : (
                     index_of_best_solution_to_share + solutions_to_share
                 )
             ]
         elif self.send_strategy is SendStrategy.Average:
-            return self.algorithm.solutions[
+            chosen_solutions = self.algorithm.solutions[
                 (number_of_solutions - solutions_to_share)
                 // 2 : (number_of_solutions + solutions_to_share)
                 // 2
             ]
         elif self.send_strategy is SendStrategy.Worst:
-            return self.algorithm.solutions[
+            chosen_solutions = self.algorithm.solutions[
                 (
                     -solutions_to_share - index_of_best_solution_to_share
                 ) : -index_of_best_solution_to_share
             ]
         elif self.send_strategy is SendStrategy.Random:
-            return random.sample(self.algorithm.solutions, solutions_to_share)
+            chosen_solutions = random.sample(self.algorithm.solutions, solutions_to_share)
         elif self.send_strategy is SendStrategy.Dont:
-            return []
+            chosen_solutions = []
         elif self.send_strategy is SendStrategy.Outlying:
-            return self.rank_outliers()[
+            chosen_solutions = self.rank_outliers()[
                 index_of_best_solution_to_share : (
                     solutions_to_share + index_of_best_solution_to_share
                 )
             ]
-
+        self.last_shared_solutions = chosen_solutions
+        return chosen_solutions        
+        
     def use_shared_solutions(
         self,
         shared_solutions: list[Solution],
         agent_sharing_the_solution,
     ):
+        starting_population_size = len(self.algorithm.solutions)
+        
         if self.accept_strategy is AcceptStrategy.Always:
             shared_solutions.extend(self.algorithm.solutions)
             self.algorithm.solutions = shared_solutions[
@@ -148,14 +159,17 @@ class StrategyAgent(BaseAgent):
                     )
 
                 trust_change = 0
-                for shared_solution in shared_solutions:
-                    if shared_solution in self.algorithm.solutions:
-                        # A useful solution was shared.
-                        trust_change -= 1
-                    else:
-                        # A useless solution was shared.
-                        trust_change += 1
-
+                if len(shared_solutions) > 0:
+                    for shared_solution in shared_solutions:
+                        if shared_solution in self.algorithm.solutions:
+                            # A useful solution was shared.
+                            trust_change -= 1
+                        else:
+                            # A useless solution was shared.
+                            trust_change += 1
+                else:
+                    trust_change = self.no_send_penalty # May want to make this value a parameter.
+                
                 self.trust[agent_sharing_the_solution] = max(
                     self.__class__.MAX_TRUST_LEVEL,
                     self.trust[agent_sharing_the_solution] + trust_change,
@@ -179,19 +193,35 @@ class StrategyAgent(BaseAgent):
                         self.__class__.MAX_TRUST_LEVEL
                     )
 
-                trust_change = 0
-                for shared_solution in shared_solutions:
-                    if shared_solution in self.algorithm.solutions:
-                        # A useful solution was shared.
-                        trust_change -= 1
-                    else:
-                        # A useless solution was shared.
-                        trust_change += 1
-
+                if len(shared_solutions) > 0:
+                    trust_change = 0
+                    for shared_solution in shared_solutions:
+                        if shared_solution in self.algorithm.solutions:
+                            # A useful solution was shared.
+                            trust_change -= 1
+                        else:
+                            # A useless solution was shared.
+                            trust_change += 1
+                else:
+                    trust_change = self.no_send_penalty # May want to make this value a parameter.
+                    
                 self.trust[agent_sharing_the_solution] = max(
                     self.__class__.MAX_TRUST_LEVEL,
                     self.trust[agent_sharing_the_solution] + trust_change,
                 )
+        
+        '''
+        In some cases (e.g. when Agent sends but does not accept solutions) the population size decreases.
+        To keep the population size constant, we need to fill in the gaps.
+        Currently we use method that creates a new solution by crossing existing solutions. 
+        '''
+        if len(self.algorithm.solutions) < starting_population_size:
+            new_solutions = self.algorithm.reproduction[self.algorithm.solutions]
+            while len(self.algorithm.solutions) < starting_population_size:
+                self.algorithm.solutions.append(new_solutions.pop())
+        # Double Check
+        if len(self.algorithm.solutions) < starting_population_size:
+            print("Population refill is not enough!!!")
 
     # Returns solutions sorted by the dot product of its variables and the mean variables of all the solutions
     # in an ascending order.

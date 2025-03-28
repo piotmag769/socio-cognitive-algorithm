@@ -16,7 +16,7 @@ BEST_TO_PLOT = 5
 
 # Script Params
 data_dir = (
-    OUTPUT_DIR + "/2025_LABS_Local"
+    OUTPUT_DIR + "/2025_3_17_21_24_32"
 )  # Make sure that you choose a dir that has experiments with the same agent setup
 exp_name = "LABS_NO_MIGRATION_100var_5run_AllDifferent_LONG_TRUST_LOCAL_LOCAL"  # Title based on Problem, Nr of runs and Agent Combination
 
@@ -66,16 +66,17 @@ def plot_and_save_average_agent_class_performance_in_training():
             iter_labels, mean_data - std_data, mean_data + std_data, alpha=0.2
         )
 
-        plt.annotate(
-            f"{final_y:.2f}",  # Annotate with the final value (formatted to 2 decimals)
-            (iter_labels[-1], final_y),  # The point to annotate
-            bbox=dict(boxstyle="round,pad=0.3", edgecolor="black", facecolor="white"),
-            textcoords="offset points",  # Position the text relative to the point
-            xytext=(25, -15 * i),  # Offset the text by (x, y) pixels
-            arrowprops=dict(arrowstyle="-", color="gray"),
-            fontsize=10,
-            color="black",
-        )
+        ''' Displaying the final value on the graph - best done manually per graph '''
+        # plt.annotate(
+        #     f"{final_y:.2f}",  # Annotate with the final value (formatted to 2 decimals)
+        #     (iter_labels[-1], final_y),  # The point to annotate
+        #     bbox=dict(boxstyle="round,pad=0.3", edgecolor="black", facecolor="white"),
+        #     textcoords="offset points",  # Position the text relative to the point
+        #     xytext=(25, -15 * i),  # Offset the text by (x, y) pixels
+        #     arrowprops=dict(arrowstyle="-", color="gray"),
+        #     fontsize=10,
+        #     color="black",
+        # )
 
     ax.set_title(exp_name)
     ax.legend(loc="upper right")
