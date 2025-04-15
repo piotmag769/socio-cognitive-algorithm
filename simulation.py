@@ -59,7 +59,7 @@ def run_simulations_and_save_results():
 
         for problem in [problem_type(NUM_OF_VARS) for problem_type in PROBLEMS_TO_TEST]:
 
-            ''' SINGLE AGENT CLASS SIMULATION '''
+            """SINGLE AGENT CLASS SIMULATION"""
             # for agent_class in AGENTS_TO_TEST:
             #     if agent_class is StrategyAgent:
             #         for accept_strategy in ACCEPT_STRATEGIES_TO_TEST:
@@ -78,7 +78,7 @@ def run_simulations_and_save_results():
             #             agent_class, problem, output_file_path, None, None
             #         )
 
-            ''' MULTI AGENT CLASS SIMULATION '''
+            """ MULTI AGENT CLASS SIMULATION """
             os.makedirs(custom_output, exist_ok=True)
             output_file_path = (
                 f"{custom_output}/CustomMultiClass_{problem.name()}_{current_date}.csv"

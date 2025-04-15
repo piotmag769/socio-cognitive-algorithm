@@ -20,7 +20,6 @@ from .agents import AcceptStrategy, BaseAgent, SendStrategy, StrategyAgent
 from .exchange_logic import ExchangeMarket
 
 
-
 class Runner:
     def __init__(
         self,
@@ -49,7 +48,6 @@ class Runner:
         part_to_swap: Optional[float] = 0.1,
         migration: bool = False,
     ):
-        
         global_trust = {}
         # In case of a Uniform Agent Class simulation
         if callable(agent_class):
@@ -124,7 +122,14 @@ class Runner:
         for agent in self.agents:
             agent.algorithm.init_progress()
 
-        data_to_save = {"generation": [], "agent_id": [], "score": [], "class": [], "population": [], "trust": []}
+        data_to_save = {
+            "generation": [],
+            "agent_id": [],
+            "score": [],
+            "class": [],
+            "population": [],
+            "trust": [],
+        }
 
         # TODO: update this to make sense with more compilcated criteria than number of evaluations.
         number_of_generations = 0
@@ -153,15 +158,19 @@ class Runner:
                     else:
                         data_to_save["class"].append(type(agent).__name__)
                 except KeyboardInterrupt:
-                    pd.DataFrame(data_to_save).to_csv(self.output_file_path, index=False)
+                    pd.DataFrame(data_to_save).to_csv(
+                        self.output_file_path, index=False
+                    )
                     print("Program stopped by user.")
                     exit()
                 except Exception as e:
-                    pd.DataFrame(data_to_save).to_csv(self.output_file_path, index=False)
+                    pd.DataFrame(data_to_save).to_csv(
+                        self.output_file_path, index=False
+                    )
                     print(f"An error occurred: {e}")
                     print("Program stopped due to an error.")
                     exit()
-            
+
             if number_of_generations % self.generations_per_swap == 0:
                 self.exchange_market.exchange_information()
 

@@ -20,12 +20,13 @@ ITERATION_INTERVAL = 50
 data_dir = (
     OUTPUT_DIR + "/2025_3_28_21_19_32_MIGRATION"
 )  # Make sure that you choose a dir that has experiments with the same agent setup
-exp_name = "Griewank_Migration"  # Title based on Problem, Nr of runs and Agent Combination
+exp_name = (
+    "Griewank_Migration"  # Title based on Problem, Nr of runs and Agent Combination
+)
 
 
 def plot_and_save_average_agent_class_trust_in_training():
-
-    ''' Extracting data into a single dataframe '''
+    """Extracting data into a single dataframe"""
     dataframes = []
     for filename in os.listdir(path=data_dir):
         current_df = pd.read_csv(f"{data_dir}/{filename}")
@@ -34,18 +35,20 @@ def plot_and_save_average_agent_class_trust_in_training():
         dataframes.append(current_df)
     df = pd.concat(dataframes, ignore_index=False)
 
-    ''' Data cleaning and processing '''
+    """ Data cleaning and processing """
     first_generation_df = current_df.loc[current_df["generation"] == ITERATION_INTERVAL]
-    unique_ids_and_classes = first_generation_df[["agent_id", "class"]].drop_duplicates()
+    unique_ids_and_classes = first_generation_df[
+        ["agent_id", "class"]
+    ].drop_duplicates()
     agent_id_to_class = unique_ids_and_classes.set_index("agent_id")["class"].to_dict()
-    class_to_agent_ids = unique_ids_and_classes.groupby("class")["agent_id"].apply(list).to_dict()
-    
+    class_to_agent_ids = (
+        unique_ids_and_classes.groupby("class")["agent_id"].apply(list).to_dict()
+    )
+
     # Init trust dict
     trust_dict = {
         current_class: {
-            other_class: {
-                generation: 0 for generation in df["generation"].unique()
-            }
+            other_class: {generation: 0 for generation in df["generation"].unique()}
             for other_class in class_to_agent_ids.keys()
         }
         for current_class in class_to_agent_ids.keys()
@@ -54,7 +57,7 @@ def plot_and_save_average_agent_class_trust_in_training():
     for current_class in trust_dict.keys():
         for other_class in trust_dict[current_class].keys():
             trust_dict[current_class][other_class][0] = STARTING_TRUST
-    
+
     # Iteration over each generation
     for generation in df["generation"].unique():
         generation_df = df.loc[df["generation"] == generation]
@@ -65,7 +68,10 @@ def plot_and_save_average_agent_class_trust_in_training():
             trust_string = row["trust"]
             trust_string = [trust for trust in trust_string.split("_")]
             trust_string = trust_string[:-1]
-            trust_per_id = { int(trust.split(":")[0]): int(trust.split(":")[1]) for trust in trust_string }
+            trust_per_id = {
+                int(trust.split(":")[0]): int(trust.split(":")[1])
+                for trust in trust_string
+            }
             # Add missing keys with STARTING_TRUST value
             for missing_id in agent_id_to_class.keys():
                 if missing_id not in trust_per_id.keys():
@@ -80,13 +86,15 @@ def plot_and_save_average_agent_class_trust_in_training():
             # Filling in trust_dict with trust values per class from position of this agent_id
             for class_name, trust in trust_per_class.items():
                 trust_dict[agent_id_to_class[agent_id]][class_name][generation] += trust
-        
+
         # Normalizing trust values (dividing per agents count x class count)
         for current_class in trust_dict.keys():
             for other_class in trust_dict[current_class].keys():
-                trust_dict[current_class][other_class][generation] /= len(class_to_agent_ids[current_class]) * len(class_to_agent_ids[other_class])
+                trust_dict[current_class][other_class][generation] /= len(
+                    class_to_agent_ids[current_class]
+                ) * len(class_to_agent_ids[other_class])
 
-    ''' Plotting trust values per generation for each agent class '''
+    """ Plotting trust values per generation for each agent class """
     num_classes = len(trust_dict.keys())
     fig, axes = plt.subplots(num_classes, 1, figsize=(10, 5 * num_classes), sharex=True)
 
@@ -122,8 +130,8 @@ def plot_and_save_average_agent_class_trust_in_training():
     plt.tight_layout(pad=5.0)  # Add more vertical padding between plots
     plt.show()
 
-    ''' Plot config '''
-    
+    """ Plot config """
+
     # Plot saving.
     os.makedirs(MULTI_CLASS_PLOTS_DIR, exist_ok=True)
 

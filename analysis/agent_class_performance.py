@@ -66,7 +66,7 @@ def plot_and_save_average_agent_class_performance_in_training():
             iter_labels, mean_data - std_data, mean_data + std_data, alpha=0.2
         )
 
-        ''' Displaying the final value on the graph - best done manually per graph '''
+        """ Displaying the final value on the graph - best done manually per graph """
         # plt.annotate(
         #     f"{final_y:.2f}",  # Annotate with the final value (formatted to 2 decimals)
         #     (iter_labels[-1], final_y),  # The point to annotate

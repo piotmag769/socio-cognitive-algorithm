@@ -5,10 +5,11 @@ from typing import Optional
 from jmetal.algorithm.singleobjective import GeneticAlgorithm
 from jmetal.core.solution import Solution
 
+
 class BaseAgent:
     POPULATION_PART_TO_SWAP = 0.1
     last_shared_solutions = None
-    id = -1,
+    id = (-1,)
 
     def __init__(self, algorithm: GeneticAlgorithm, *args):
         self.algorithm = algorithm
