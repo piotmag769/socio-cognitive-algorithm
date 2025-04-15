@@ -24,16 +24,23 @@ from analysis.constants_and_params import (
     SEND_STRATEGIES_TO_TEST,
     MULTI_CLASS_SETUP,
     TRUST_MECHANISM,
+    NUMBER_OF_RUNS,
+    NUM_OF_VARS,
+    MIGRATION,
+    POPULATION_SIZE,
+    OFFSPRING_POPULATION_SIZE,
+    GENERATIONS_PER_SWAP,
+    MAX_EVALUATIONS,
+    AGENTS_NUMBER,
+    STARTING_TRUST,
+    NO_SEND_PENALTY,
+    POPULATION_PART_TO_SWAP,
 )
 
 # Multi class setup parsing
 agents = MULTI_CLASS_SETUP[0]
 send_strategies = MULTI_CLASS_SETUP[1]
 accept_strategies = MULTI_CLASS_SETUP[2]
-
-NUMBER_OF_RUNS = 5
-NUM_OF_VARS = 100
-MIGRATION = False
 
 
 def run_simulations_and_save_results():
@@ -52,7 +59,7 @@ def run_simulations_and_save_results():
 
         for problem in [problem_type(NUM_OF_VARS) for problem_type in PROBLEMS_TO_TEST]:
 
-            ### SINGLE AGENT CLASS SIMULATION
+            """SINGLE AGENT CLASS SIMULATION"""
             # for agent_class in AGENTS_TO_TEST:
             #     if agent_class is StrategyAgent:
             #         for accept_strategy in ACCEPT_STRATEGIES_TO_TEST:
@@ -71,7 +78,7 @@ def run_simulations_and_save_results():
             #             agent_class, problem, output_file_path, None, None
             #         )
 
-            ### MULTI AGENT CLASS SIMULATION
+            """ MULTI AGENT CLASS SIMULATION """
             os.makedirs(custom_output, exist_ok=True)
             output_file_path = (
                 f"{custom_output}/CustomMultiClass_{problem.name()}_{current_date}.csv"
@@ -101,19 +108,22 @@ def run_single_simulation(
     runner = Runner(
         output_file_path=output_file_path,
         agent_class=agent_class,
-        agents_number=10,
-        generations_per_swap=10,
+        agents_number=AGENTS_NUMBER,  # Needed only for single class, non strategy based agents
+        generations_per_swap=GENERATIONS_PER_SWAP,
         problem=deepcopy(problem),
-        population_size=20,
-        offspring_population_size=10,
+        population_size=POPULATION_SIZE,
+        offspring_population_size=OFFSPRING_POPULATION_SIZE,
         mutation=mutation,
         crossover=crossover,
         selection=BinaryTournamentSelection(),
-        termination_criterion=StoppingByEvaluations(max_evaluations=100000),
+        termination_criterion=StoppingByEvaluations(max_evaluations=MAX_EVALUATIONS),
         send_strategy=send_strategy,
         accept_strategy=accept_strategy,
         migration=MIGRATION,
         trust_mechanism=TRUST_MECHANISM,
+        starting_trust=STARTING_TRUST,
+        no_send_penalty=NO_SEND_PENALTY,
+        part_to_swap=POPULATION_PART_TO_SWAP,
     )
     runner.run_simulation()
 

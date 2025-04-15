@@ -43,6 +43,9 @@ class Runner:
         accept_strategy: Optional[AcceptStrategy | List[AcceptStrategy]] = None,
         send_strategy: Optional[SendStrategy | List[AcceptStrategy]] = None,
         trust_mechanism: Optional[TrustMechanism] = None,
+        starting_trust: Optional[int] = None,
+        no_send_penalty: Optional[int] = 2,
+        part_to_swap: Optional[float] = 0.1,
         migration: bool = False,
     ):
         global_trust = {}
@@ -67,8 +70,10 @@ class Runner:
                     accept_strategy,
                     trust_mechanism,
                     global_trust,
+                    starting_trust=starting_trust,
+                    id=agent_nr,
                 )
-                for _ in range(agents_number)
+                for agent_nr in range(agents_number)
             ]
         # In case of a Multiple Agent Class simulation (lists of Agent Classes and Send/Accept Strategies were passed as args)
         elif isinstance(agent_class, list):
@@ -91,6 +96,10 @@ class Runner:
                     accept_strategy[agent_nr],
                     trust_mechanism,
                     global_trust,
+                    starting_trust=starting_trust,
+                    no_send_penalty=no_send_penalty,
+                    part_to_swap=part_to_swap,
+                    id=agent_nr,
                 )
                 for agent_nr in range(len(agent_class))
             ]
@@ -113,28 +122,54 @@ class Runner:
         for agent in self.agents:
             agent.algorithm.init_progress()
 
-        data_to_save = {"generation": [], "agent_id": [], "score": [], "class": []}
+        data_to_save = {
+            "generation": [],
+            "agent_id": [],
+            "score": [],
+            "class": [],
+            "population": [],
+            "trust": [],
+        }
 
         # TODO: update this to make sense with more compilcated criteria than number of evaluations.
         number_of_generations = 0
         while not agent.algorithm.stopping_condition_is_met():
             number_of_generations += 1
             for agent_id, agent in enumerate(self.agents):
-                agent.algorithm.step()
-                agent.algorithm.update_progress()
-                data_to_save["generation"].append(number_of_generations)
-                data_to_save["agent_id"].append(agent_id)
-                data_to_save["score"].append(agent.algorithm.result().objectives[0])
-                if isinstance(agent, StrategyAgent):
-                    data_to_save["class"].append(
-                        type(agent).__name__
-                        + "_"
-                        + agent.accept_strategy.name
-                        + "_"
-                        + agent.send_strategy.name
+                try:
+                    agent.algorithm.step()
+                    agent.algorithm.update_progress()
+                    data_to_save["generation"].append(number_of_generations)
+                    data_to_save["agent_id"].append(agent_id)
+                    data_to_save["score"].append(agent.algorithm.result().objectives[0])
+                    data_to_save["population"].append(len(agent.algorithm.solutions))
+                    if isinstance(agent, StrategyAgent):
+                        data_to_save["class"].append(
+                            type(agent).__name__
+                            + "_"
+                            + agent.accept_strategy.name
+                            + "_"
+                            + agent.send_strategy.name
+                        )
+                        trust_string = ""
+                        for trust_agent, trust_level in agent.trust.items():
+                            trust_string += f"{trust_agent.id}:{int(trust_level)}_"
+                        data_to_save["trust"].append(trust_string)
+                    else:
+                        data_to_save["class"].append(type(agent).__name__)
+                except KeyboardInterrupt:
+                    pd.DataFrame(data_to_save).to_csv(
+                        self.output_file_path, index=False
                     )
-                else:
-                    data_to_save["class"].append(type(agent).__name__)
+                    print("Program stopped by user.")
+                    exit()
+                except Exception as e:
+                    pd.DataFrame(data_to_save).to_csv(
+                        self.output_file_path, index=False
+                    )
+                    print(f"An error occurred: {e}")
+                    print("Program stopped due to an error.")
+                    exit()
 
             if number_of_generations % self.generations_per_swap == 0:
                 self.exchange_market.exchange_information()
