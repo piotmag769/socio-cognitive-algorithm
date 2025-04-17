@@ -7,13 +7,13 @@ OUTPUT_DIR = "./output"
 PLOTS_DIR = "./graphs"
 BOX_AND_WHISKERS_PLOTS_DIR = f"{PLOTS_DIR}/box_and_whiskers"
 MEAN_PLOTS_DIR = f"{PLOTS_DIR}/mean"
-MULTI_CLASS_PLOTS_DIR = f"{PLOTS_DIR}/multi_class"
+MULTI_CLASS_PLOTS_DIR = f"{PLOTS_DIR}/new"
 
 SIGNIFICANCE_LEVEL = 0.05
-NUMBER_OF_ITERATIONS = 9998  # 9998 for 100000 iterations, 998 for 10000 iterations
+NUMBER_OF_ITERATIONS = 9998  # 9998 for 100000 evaluations, 998 for 10000 evaluations
 TRUST_MECHANISM = TrustMechanism.Local
-NUMBER_OF_RUNS = 1
-NUM_OF_VARS = 100
+NUMBER_OF_RUNS = 10
+NUM_OF_VARS = 200
 POPULATION_SIZE = 20
 OFFSPRING_POPULATION_SIZE = 10
 STARTING_TRUST = 10
@@ -27,8 +27,8 @@ NO_SEND_PENALTY = int(POPULATION_SIZE * POPULATION_PART_TO_SWAP)
 AGENTS_TO_TEST = [AgentWithTrust, StrategyAgent]
 # TODO: add Ackley and other binary problem
 PROBLEMS_TO_TEST = [
-    # LABS,
-    # ExpandedSchaffer,
+    LABS,
+    ExpandedSchaffer,
     Griewank,
 ]
 ACCEPT_STRATEGIES_TO_TEST = [
@@ -81,28 +81,28 @@ accept_strategies = []
 #     accept_strategies.append(AcceptStrategy.Better)
 
 """ 1Extractor_2Tryhard_2Filter_6Creative """
-for _ in range(1):
-    agents.append(StrategyAgent)  # Extractor
-    send_strategies.append(SendStrategy.Dont)
-    accept_strategies.append(AcceptStrategy.Better)
-for _ in range(2):
-    agents.append(StrategyAgent)  # Tryhard
-    send_strategies.append(SendStrategy.Best)
-    accept_strategies.append(AcceptStrategy.Always)
-for _ in range(2):
-    agents.append(StrategyAgent)  # Filter
-    send_strategies.append(SendStrategy.Best)
-    accept_strategies.append(AcceptStrategy.Different)
-for _ in range(6):
-    agents.append(StrategyAgent)  # Creative
-    send_strategies.append(SendStrategy.Outlying)
-    accept_strategies.append(AcceptStrategy.Different)
+# for _ in range(1):
+#     agents.append(StrategyAgent)  # Extractor
+#     send_strategies.append(SendStrategy.Dont)
+#     accept_strategies.append(AcceptStrategy.Better)
+# for _ in range(2):
+#     agents.append(StrategyAgent)  # Tryhard
+#     send_strategies.append(SendStrategy.Best)
+#     accept_strategies.append(AcceptStrategy.Always)
+# for _ in range(2):
+#     agents.append(StrategyAgent)  # Filter
+#     send_strategies.append(SendStrategy.Best)
+#     accept_strategies.append(AcceptStrategy.Different)
+# for _ in range(6):
+#     agents.append(StrategyAgent)  # Creative
+#     send_strategies.append(SendStrategy.Outlying)
+#     accept_strategies.append(AcceptStrategy.Different)
 
 """All different mixes."""
-# for send_strategy in SendStrategy:
-#     for accept_strategy in AcceptStrategy:
-#         agents.append(StrategyAgent)
-#         send_strategies.append(send_strategy)
-#         accept_strategies.append(accept_strategy)
+for send_strategy in SendStrategy:
+    for accept_strategy in AcceptStrategy:
+        agents.append(StrategyAgent)
+        send_strategies.append(send_strategy)
+        accept_strategies.append(accept_strategy)
 
 MULTI_CLASS_SETUP = [agents, send_strategies, accept_strategies]

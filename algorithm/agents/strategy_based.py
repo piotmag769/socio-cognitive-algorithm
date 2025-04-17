@@ -179,7 +179,7 @@ class StrategyAgent(BaseAgent):
             pass
         elif self.accept_strategy is AcceptStrategy.Different:
             self.algorithm.solutions.extend(shared_solutions)
-            self.algorithm.solutions = self.rank_outliers(self.algorithm.solutions)[
+            self.algorithm.solutions = self.rank_outliers()[
                 : self.algorithm.population_size
             ]
 
@@ -225,11 +225,8 @@ class StrategyAgent(BaseAgent):
 
     # Returns solutions sorted by the dot product of its variables and the mean variables of all the solutions
     # in an ascending order.
-    def rank_outliers(self, new_solutions=None):
-        if new_solutions is not None:
-            solutions = self.algorithm.solutions + new_solutions
-        else:
-            solutions = self.algorithm.solutions
+    def rank_outliers(self):
+        solutions = self.algorithm.solutions
 
         if isinstance(self.algorithm.problem, BinaryProblem):
             variables_mean = np.array(

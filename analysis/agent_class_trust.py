@@ -1,15 +1,15 @@
+from collections import defaultdict
 import datetime
 import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
+import seaborn as sns
 
 from .constants_and_params import (
     NUMBER_OF_ITERATIONS,
     OUTPUT_DIR,
     MULTI_CLASS_PLOTS_DIR,
-    GENERATIONS_PER_SWAP,
     STARTING_TRUST,
 )
 
@@ -18,11 +18,9 @@ ITERATION_INTERVAL = 50
 
 # Script Params
 data_dir = (
-    OUTPUT_DIR + "/2025_3_28_21_19_32_MIGRATION"
+    OUTPUT_DIR + "/2025_4_16_5_13_22"
 )  # Make sure that you choose a dir that has experiments with the same agent setup
-exp_name = (
-    "Griewank_Migration"  # Title based on Problem, Nr of runs and Agent Combination
-)
+exp_name = "LABS"  # Title based on Problem, Nr of runs and Agent Combination
 
 
 def plot_and_save_average_agent_class_trust_in_training():
@@ -94,56 +92,92 @@ def plot_and_save_average_agent_class_trust_in_training():
                     class_to_agent_ids[current_class]
                 ) * len(class_to_agent_ids[other_class])
 
-    """ Plotting trust values per generation for each agent class """
-    num_classes = len(trust_dict.keys())
-    fig, axes = plt.subplots(num_classes, 1, figsize=(10, 5 * num_classes), sharex=True)
+    num_classes = len(trust_dict)
+    fig, axes = plt.subplots(
+        2 * num_classes, 1, figsize=(10, 5 * 2 * num_classes), sharex=True
+    )
+    # Shared legend.
+    lines = []
+    labels = []
 
-    if num_classes == 1:
-        axes = [axes]  # Ensure axes is iterable when there's only one class
+    color_map = (
+        sns.color_palette("Set1", 9)
+        + sns.color_palette("Set2", 8)
+        + sns.color_palette("Set3", 7)
+    )
+    class_colors = {
+        class_name: color_map[i]
+        for i, class_name in enumerate(class_to_agent_ids.keys())
+    }
 
-    for idx, (current_class, other_classes) in enumerate(trust_dict.items()):
-        ax = axes[idx]
-        # max_trust_value = max(
-        #     trust_value
-        #     for trust_values in other_classes.values()
-        #     for trust_value in trust_values.values()
-        # )
-        max_trust_value = 20  # Set a fixed max trust value for all plots
-        min_trust_value = min(
-            trust_value
-            for trust_values in other_classes.values()
-            for trust_value in trust_values.values()
-        )
+    # Trust FROM
+    trust_from_other_agents = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+    for class_from, trusts_to in trust_dict.items():
+        for class_to, gen_trusts in trusts_to.items():
+            for gen, trust in gen_trusts.items():
+                trust_from_other_agents[class_to][class_from][gen] += trust
 
-        for other_class, trust_values in other_classes.items():
-            generations = sorted(trust_values.keys())
-            trust_scores = [trust_values[generation] for generation in generations]
-            ax.plot(generations, trust_scores, label=f"Trust in {other_class}")
+    for idx, cls in enumerate(class_to_agent_ids.keys()):
+        ax_to = axes[2 * idx]
+        ax_from = axes[2 * idx + 1]
 
-        ax.set_title(f"Trust Values for Class {current_class}")
-        ax.set_ylim(min_trust_value - 5, max_trust_value + 5)  # Adjust ylim dynamically
-        ax.set_ylabel("Trust")
-        ax.grid(visible=True, alpha=0.3)
-        ax.legend()
+        # Outgoing Trust
+        for class_to, gen_trusts in trust_dict[cls].items():
+            if cls == class_to:
+                continue
+            generations = sorted(gen_trusts.keys())
+            trust_scores = [100 - gen_trusts[generation] for generation in generations]
+            ax_to.plot(
+                generations,
+                trust_scores,
+                label=f"Trust to {class_to}",
+                color=class_colors[class_to],
+            )
+
+        ax_to.set_title(f"Trust Given by {cls}")
+        ax_to.grid(True)
+
+        # Incoming Trust
+        for class_from, gen_trusts in trust_from_other_agents[cls].items():
+            if cls == class_to:
+                continue
+
+            generations = sorted(gen_trusts.keys())
+            trust_scores = [100 - gen_trusts[generation] for generation in generations]
+            (line,) = ax_from.plot(
+                generations,
+                trust_scores,
+                label=f"Trust from {class_from}",
+                color=class_colors[class_from],
+            )
+            if class_from not in labels:
+                lines.append(line)
+                labels.append(class_from)
+        ax_from.set_title(f"Trust Received by {cls}")
+        ax_from.grid(True)
 
     axes[-1].set_xlabel("Generation")
-    plt.tight_layout(pad=5.0)  # Add more vertical padding between plots
-    plt.show()
 
-    """ Plot config """
+    # Adding a shared legend outside the plot
+    fig.legend(lines, labels, loc="center right", borderaxespad=0.1)
+    # Adjust layout and save the figure
+    plt.tight_layout()
 
-    # Plot saving.
-    os.makedirs(MULTI_CLASS_PLOTS_DIR, exist_ok=True)
+    plt.subplots_adjust(
+        left=0.2, bottom=0.05, right=0.8, top=0.95, wspace=0.4, hspace=0.8
+    )  # Adjust hspace for better spacing
 
     now = datetime.datetime.now()
     current_date = (
         f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
     )
-    plt.subplots_adjust(
-        left=0.2, bottom=0.05, right=0.8, top=0.95, wspace=0.4, hspace=0.8
-    )  # Adjust hspace for better spacing
+    os.makedirs(MULTI_CLASS_PLOTS_DIR, exist_ok=True)
 
-    fig.savefig(f"{MULTI_CLASS_PLOTS_DIR}/{exp_name}_graph_{current_date}.png", dpi=100)
+    # Plot saving.
+    fig.savefig(
+        f"{MULTI_CLASS_PLOTS_DIR}/TRUST_TO_{exp_name}__{current_date}.png",
+        dpi=100,
+    )
 
 
 if __name__ == "__main__":
