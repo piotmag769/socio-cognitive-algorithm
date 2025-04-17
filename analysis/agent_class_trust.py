@@ -17,11 +17,8 @@ from .constants_and_params import (
 ITERATION_INTERVAL = 50
 # BEST_TO_PLOT = 5
 
-# Script Params
-data_dir = (
-    OUTPUT_DIR + "/now/LABS"
-)  # Make sure that you choose a dir that has experiments with the same agent setup
 exp_name = "LABS"  # Title based on Problem, Nr of runs and Agent Combination
+data_dir = f"{OUTPUT_DIR}/new/{exp_name}"  # Make sure that you choose a dir that has experiments with the same agent setup
 
 
 def plot_and_save_average_agent_class_trust_in_training():
@@ -103,12 +100,33 @@ def plot_and_save_average_agent_class_trust_in_training():
             if cls == class_to:
                 continue
             generations = sorted(gen_trusts.keys())
-            trust_scores = [-gen_trusts[generation][0] for generation in generations]
+            trust_scores = np.array(
+                [-gen_trusts[generation][0] for generation in generations]
+            )
+            stds = np.array([gen_trusts[generation][1] for generation in generations])
             ax_to.plot(
                 generations,
                 trust_scores,
-                label=f"Trust to {class_to}",
                 color=class_colors[class_to],
+            )
+            ax_to.fill_between(
+                generations,
+                trust_scores - stds,
+                trust_scores + stds,
+                alpha=0.2,
+                color=class_colors[class_to],
+            )
+            ax_to.annotate(
+                class_to,  # Annotate with the final value (formatted to 2 decimals)
+                (generations[-1], trust_scores[-1]),  # The point to annotate
+                bbox=dict(
+                    boxstyle="round,pad=0.3", edgecolor="black", facecolor="white"
+                ),
+                textcoords="offset points",  # Position the text relative to the point
+                xytext=(25, -15 * 2),  # Offset the text by (x, y) pixels
+                arrowprops=dict(arrowstyle="-", color="gray"),
+                fontsize=10,
+                color="black",
             )
 
         ax_to.set_title(f"Trust Given by {cls}")
@@ -116,16 +134,37 @@ def plot_and_save_average_agent_class_trust_in_training():
 
         # Incoming Trust
         for class_from, gen_trusts in trust_received[cls].items():
-            if cls == class_to:
+            if cls == class_from:
                 continue
 
             generations = sorted(gen_trusts.keys())
-            trust_scores = [-gen_trusts[generation][0] for generation in generations]
+            trust_scores = np.array(
+                [-gen_trusts[generation][0] for generation in generations]
+            )
+            stds = np.array([gen_trusts[generation][1] for generation in generations])
             (line,) = ax_from.plot(
                 generations,
                 trust_scores,
-                label=f"Trust from {class_from}",
                 color=class_colors[class_from],
+            )
+            ax_from.fill_between(
+                generations,
+                trust_scores - stds,
+                trust_scores + stds,
+                alpha=0.2,
+                color=class_colors[class_from],
+            )
+            ax_from.annotate(
+                class_from,  # Annotate with the final value (formatted to 2 decimals)
+                (generations[-1], trust_scores[-1]),  # The point to annotate
+                bbox=dict(
+                    boxstyle="round,pad=0.3", edgecolor="black", facecolor="white"
+                ),
+                textcoords="offset points",  # Position the text relative to the point
+                xytext=(25, -15 * 2),  # Offset the text by (x, y) pixels
+                arrowprops=dict(arrowstyle="-", color="gray"),
+                fontsize=10,
+                color="black",
             )
             if class_from not in labels:
                 lines.append(line)
@@ -136,7 +175,7 @@ def plot_and_save_average_agent_class_trust_in_training():
     axes[-1].set_xlabel("Generation")
 
     # Adding a shared legend outside the plot
-    fig.legend(lines, labels, loc="center right", borderaxespad=0.1)
+    fig.legend(lines, labels, loc="center left", borderaxespad=0.1)
     # Adjust layout and save the figure
     plt.tight_layout()
 
@@ -152,7 +191,7 @@ def plot_and_save_average_agent_class_trust_in_training():
 
     # Plot saving.
     fig.savefig(
-        f"{MULTI_CLASS_PLOTS_DIR}/TRUST_TO_{exp_name}__{current_date}.png",
+        f"{MULTI_CLASS_PLOTS_DIR}/TRUST_{exp_name}__{current_date}.png",
         dpi=100,
     )
 

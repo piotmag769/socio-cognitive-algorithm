@@ -7,7 +7,7 @@ OUTPUT_DIR = "./output"
 PLOTS_DIR = "./graphs"
 BOX_AND_WHISKERS_PLOTS_DIR = f"{PLOTS_DIR}/box_and_whiskers"
 MEAN_PLOTS_DIR = f"{PLOTS_DIR}/mean"
-MULTI_CLASS_PLOTS_DIR = f"{PLOTS_DIR}/new"
+MULTI_CLASS_PLOTS_DIR = f"{PLOTS_DIR}/TRUST_200vars_migration_local_trust"
 
 SIGNIFICANCE_LEVEL = 0.05
 NUMBER_OF_ITERATIONS = 9998  # 9998 for 100000 evaluations, 998 for 10000 evaluations
