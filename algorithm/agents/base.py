@@ -11,7 +11,7 @@ class BaseAgent:
     last_shared_solutions = None
     id = (-1,)
 
-    def __init__(self, algorithm: GeneticAlgorithm, *args):
+    def __init__(self, algorithm: GeneticAlgorithm, *args, **kwargs):
         self.algorithm = algorithm
 
     def get_solutions_to_share(self, agent_to_share_with) -> list[Solution]:
