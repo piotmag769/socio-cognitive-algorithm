@@ -8,20 +8,10 @@ from jmetal.operator.crossover import SBXCrossover, SPXCrossover
 from jmetal.operator.mutation import SimpleRandomMutation, BitFlipMutation
 from jmetal.util.termination_criterion import StoppingByEvaluations
 
-from algorithm import (
-    Runner,
-    StrategyAgent,
-    AgentWithTrust,
-    AcceptStrategy,
-    SendStrategy,
-    BaseAgent,
-)
+from algorithm import Runner
 from analysis.constants_and_params import (
-    ACCEPT_STRATEGIES_TO_TEST,
-    AGENTS_TO_TEST,
     OUTPUT_DIR,
     PROBLEMS_TO_TEST,
-    SEND_STRATEGIES_TO_TEST,
     MULTI_CLASS_SETUP,
     TRUST_MECHANISM,
     NUMBER_OF_RUNS,

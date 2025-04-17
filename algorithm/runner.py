@@ -127,7 +127,7 @@ class Runner:
             "agent_id": [],
             "score": [],
             "class": [],
-            "population": [],
+            # "population": [],
             "trust": [],
         }
 
@@ -142,14 +142,10 @@ class Runner:
                     data_to_save["generation"].append(number_of_generations)
                     data_to_save["agent_id"].append(agent_id)
                     data_to_save["score"].append(agent.algorithm.result().objectives[0])
-                    data_to_save["population"].append(len(agent.algorithm.solutions))
+                    # data_to_save["population"].append(len(agent.algorithm.solutions))
                     if isinstance(agent, StrategyAgent):
                         data_to_save["class"].append(
-                            type(agent).__name__
-                            + "_"
-                            + agent.accept_strategy.name
-                            + "_"
-                            + agent.send_strategy.name
+                            agent.accept_strategy.name + "_" + agent.send_strategy.name
                         )
                         trust_string = ""
                         for trust_agent, trust_level in agent.trust.items():
