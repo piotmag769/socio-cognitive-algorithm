@@ -6,19 +6,17 @@ import pandas as pd
 import numpy as np
 
 from .constants_and_params import (
+    ITERATION_INTERVAL,
     NUMBER_OF_ITERATIONS,
     OUTPUT_DIR,
     MULTI_CLASS_PLOTS_DIR,
 )
 
-ITERATION_INTERVAL = 100
-BEST_TO_PLOT = 5
+BEST_TO_PLOT = 24
 
 # Script Params
-data_dir = (
-    OUTPUT_DIR + "/2025_3_17_21_24_32"
-)  # Make sure that you choose a dir that has experiments with the same agent setup
-exp_name = "LABS_NO_MIGRATION_100var_5run_AllDifferent_LONG_TRUST_LOCAL_LOCAL"  # Title based on Problem, Nr of runs and Agent Combination
+exp_name = "LABS"  # Title based on Problem, Nr of runs and Agent Combination
+data_dir = f"{OUTPUT_DIR}/2025_{exp_name}_Local"  # Make sure that you choose a dir that has experiments with the same agent setup
 
 
 def plot_and_save_average_agent_class_performance_in_training():
@@ -30,14 +28,33 @@ def plot_and_save_average_agent_class_performance_in_training():
         current_df = current_df.loc[current_df["generation"] % ITERATION_INTERVAL == 0]
         dataframes.append(current_df)
 
+    steps_count = current_df["generation"].max() // ITERATION_INTERVAL
+
+    best_in_each_iteration_per_run = [
+        np.array(
+            [
+                df.loc[(df["generation"] == ITERATION_INTERVAL * (i + 1))][
+                    "score"
+                ].min()
+                for df in dataframes
+            ]
+        )
+        for i in range(steps_count)
+    ]
+    best_mean = np.array([x.mean() for x in best_in_each_iteration_per_run])
+    best_std = np.array([x.std(ddof=1) for x in best_in_each_iteration_per_run])
+
     df = pd.concat(dataframes, ignore_index=False)
 
     # Plot drawing.
     # Tweak parameters below when adding new problems or agents!
     fig, ax = plt.subplots(1, 1)
 
-    steps_count = df["generation"].max() // ITERATION_INTERVAL
     iter_labels = np.arange(1, df["generation"].max() + 1, ITERATION_INTERVAL)
+
+    # Plot best.
+    ax.plot(iter_labels, best_mean, label="Global best score")
+    ax.fill_between(iter_labels, best_mean - best_std, best_mean + best_std, alpha=0.2)
 
     mean_std_final_agent_type_datas = []
     for agent_type in df["class"].unique():
@@ -62,21 +79,21 @@ def plot_and_save_average_agent_class_performance_in_training():
     for i in range(BEST_TO_PLOT):
         mean_data, std_data, final_y, agent_type = mean_std_final_agent_type_datas[i]
         ax.plot(iter_labels, mean_data, label=agent_type)
-        ax.fill_between(
-            iter_labels, mean_data - std_data, mean_data + std_data, alpha=0.2
-        )
+        # ax.fill_between(
+        #     iter_labels, mean_data - std_data, mean_data + std_data, alpha=0.2
+        # )
 
         """ Displaying the final value on the graph - best done manually per graph """
-        # plt.annotate(
-        #     f"{final_y:.2f}",  # Annotate with the final value (formatted to 2 decimals)
-        #     (iter_labels[-1], final_y),  # The point to annotate
-        #     bbox=dict(boxstyle="round,pad=0.3", edgecolor="black", facecolor="white"),
-        #     textcoords="offset points",  # Position the text relative to the point
-        #     xytext=(25, -15 * i),  # Offset the text by (x, y) pixels
-        #     arrowprops=dict(arrowstyle="-", color="gray"),
-        #     fontsize=10,
-        #     color="black",
-        # )
+        plt.annotate(
+            f"{final_y:.2f}",  # Annotate with the final value (formatted to 2 decimals)
+            (iter_labels[-1], final_y),  # The point to annotate
+            bbox=dict(boxstyle="round,pad=0.3", edgecolor="black", facecolor="white"),
+            textcoords="offset points",  # Position the text relative to the point
+            xytext=(25, -15 * i),  # Offset the text by (x, y) pixels
+            arrowprops=dict(arrowstyle="-", color="gray"),
+            fontsize=10,
+            color="black",
+        )
 
     ax.set_title(exp_name)
     ax.legend(loc="upper right")

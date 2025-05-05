@@ -9,12 +9,10 @@ class ExchangeMarket:
     def __init__(
         self,
         agents: Sequence[Type[BaseAgent]],
-        global_trust: dict[BaseAgent, int],
         migration: bool = False,
     ):
         self.agents = agents
         self.migration = migration
-        self.global_trust = global_trust
 
     def exchange_information(self):
         was_paired = defaultdict(bool)
@@ -33,6 +31,7 @@ class ExchangeMarket:
             paired_agent = random.choice(not_paired_agents)
             was_paired[paired_agent] = True
 
+            starting_population_size = len(agent.algorithm.solutions)
             paired_agent_shared_solutions = paired_agent.get_solutions_to_share(agent)
             agent_shared_solutions = agent.get_solutions_to_share(paired_agent)
 
@@ -40,6 +39,10 @@ class ExchangeMarket:
                 paired_agent.remove_solutions(paired_agent_shared_solutions)
                 agent.remove_solutions(agent_shared_solutions)
 
-            agent.use_shared_solutions(paired_agent_shared_solutions, paired_agent)
+            agent.use_shared_solutions(
+                paired_agent_shared_solutions, paired_agent, starting_population_size
+            )
 
-            paired_agent.use_shared_solutions(agent_shared_solutions, agent)
+            paired_agent.use_shared_solutions(
+                agent_shared_solutions, agent, starting_population_size
+            )

@@ -1,5 +1,6 @@
 .idea
 .vscode
 /output
+/new_output
 venv
 __pycache__
