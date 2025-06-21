@@ -21,7 +21,7 @@ class SendStrategy(Enum):
     Worst = 3
     Outlying = 4
     Random = 5
-    Dont = 6  # karać
+    Dont = 6
 
 
 class AcceptStrategy(Enum):
@@ -41,6 +41,9 @@ class AcceptStrategy(Enum):
 class TrustMechanism(Enum):
     Local = 1
     Global = 2
+
+    def __str__(self):
+        return self.name
 
 
 class StrategyAgent(BaseAgent):
@@ -74,7 +77,7 @@ class StrategyAgent(BaseAgent):
         elif trust_mechanism is TrustMechanism.Local:
             self.trust = deepcopy(trust)
         else:
-            assert 1 == 0, "Unhandled case"
+            assert False, "Unhandled case"
 
     def get_solutions_to_share(self, agent_to_share_with) -> list[Solution]:
         number_of_solutions = len(self.algorithm.solutions)
@@ -130,9 +133,8 @@ class StrategyAgent(BaseAgent):
         self,
         shared_solutions: list[Solution],
         agent_sharing_the_solution,
+        starting_population_size,
     ):
-        starting_population_size = len(self.algorithm.solutions)
-
         if self.accept_strategy is AcceptStrategy.Always:
             shared_solutions.extend(self.algorithm.solutions)
             self.algorithm.solutions = shared_solutions[
@@ -179,7 +181,7 @@ class StrategyAgent(BaseAgent):
             pass
         elif self.accept_strategy is AcceptStrategy.Different:
             self.algorithm.solutions.extend(shared_solutions)
-            self.algorithm.solutions = self.rank_outliers(self.algorithm.solutions)[
+            self.algorithm.solutions = self.rank_outliers()[
                 : self.algorithm.population_size
             ]
 
@@ -216,20 +218,29 @@ class StrategyAgent(BaseAgent):
         Currently we use method that creates a new solution by crossing existing solutions. 
         """
         if len(self.algorithm.solutions) < starting_population_size:
-            new_solutions = self.algorithm.reproduction[self.algorithm.solutions]
-            while len(self.algorithm.solutions) < starting_population_size:
-                self.algorithm.solutions.append(new_solutions.pop())
+            parents_for_crossover = (
+                self.algorithm.crossover_operator.get_number_of_parents()
+            )
+            mating_population = self.algorithm.solutions[
+                : len(self.algorithm.solutions)
+                - len(self.algorithm.solutions) % parents_for_crossover
+            ]
+            new_solutions = self.algorithm.reproduction(mating_population)
+            self.algorithm.solutions.extend(
+                new_solutions[
+                    : starting_population_size - len(self.algorithm.solutions)
+                ]
+            )
+
         # Double Check
-        if len(self.algorithm.solutions) < starting_population_size:
-            assert False, "Population refill is not enough!!!"
+        assert (
+            len(self.algorithm.solutions) == starting_population_size
+        ), "Population refill is not enough!!!"
 
     # Returns solutions sorted by the dot product of its variables and the mean variables of all the solutions
     # in an ascending order.
-    def rank_outliers(self, new_solutions=None):
-        if new_solutions is not None:
-            solutions = self.algorithm.solutions + new_solutions
-        else:
-            solutions = self.algorithm.solutions
+    def rank_outliers(self):
+        solutions = self.algorithm.solutions
 
         if isinstance(self.algorithm.problem, BinaryProblem):
             variables_mean = np.array(

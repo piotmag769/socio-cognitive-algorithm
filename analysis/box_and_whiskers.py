@@ -7,12 +7,11 @@ import pandas as pd
 
 from .constants_and_params import (
     EXPERIMENTS,
+    ITERATION_INTERVAL,
     NUMBER_OF_ITERATIONS,
     OUTPUT_DIR,
     BOX_AND_WHISKERS_PLOTS_DIR,
 )
-
-ITERATION_INTERVAL = 50
 
 
 def plot_and_save_box_and_whiskers_graphs_with_best_results_for_some_iterations():

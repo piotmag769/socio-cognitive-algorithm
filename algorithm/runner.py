@@ -15,6 +15,7 @@ from jmetal.util.generator import Generator
 from jmetal.util.termination_criterion import TerminationCriterion
 
 from algorithm.agents.strategy_based import TrustMechanism
+from analysis.constants_and_params import POPULATION_SIZE
 
 from .agents import AcceptStrategy, BaseAgent, SendStrategy, StrategyAgent
 from .exchange_logic import ExchangeMarket
@@ -46,12 +47,11 @@ class Runner:
         starting_trust: Optional[int] = None,
         no_send_penalty: Optional[int] = 2,
         part_to_swap: Optional[float] = 0.1,
-        migration: bool = False,
+        migration: bool = True,
     ):
         global_trust = {}
         # In case of a Uniform Agent Class simulation
         if callable(agent_class):
-            self.is_multi_class = False
             self.agents = [
                 agent_class(
                     GeneticAlgorithm(
@@ -77,7 +77,6 @@ class Runner:
             ]
         # In case of a Multiple Agent Class simulation (lists of Agent Classes and Send/Accept Strategies were passed as args)
         elif isinstance(agent_class, list):
-            self.is_multi_class = True
             self.agents = [
                 agent_class[agent_nr](
                     GeneticAlgorithm(
@@ -104,7 +103,7 @@ class Runner:
                 for agent_nr in range(len(agent_class))
             ]
 
-        self.exchange_market = ExchangeMarket(self.agents, global_trust, migration)
+        self.exchange_market = ExchangeMarket(self.agents, migration)
         self.generations_per_swap = generations_per_swap
         self.output_file_path = output_file_path
 
@@ -127,7 +126,6 @@ class Runner:
             "agent_id": [],
             "score": [],
             "class": [],
-            "population": [],
             "trust": [],
         }
 
@@ -142,14 +140,10 @@ class Runner:
                     data_to_save["generation"].append(number_of_generations)
                     data_to_save["agent_id"].append(agent_id)
                     data_to_save["score"].append(agent.algorithm.result().objectives[0])
-                    data_to_save["population"].append(len(agent.algorithm.solutions))
+                    assert len(agent.algorithm.solutions) == POPULATION_SIZE
                     if isinstance(agent, StrategyAgent):
                         data_to_save["class"].append(
-                            type(agent).__name__
-                            + "_"
-                            + agent.accept_strategy.name
-                            + "_"
-                            + agent.send_strategy.name
+                            agent.accept_strategy.name + "_" + agent.send_strategy.name
                         )
                         trust_string = ""
                         for trust_agent, trust_level in agent.trust.items():
@@ -157,6 +151,7 @@ class Runner:
                         data_to_save["trust"].append(trust_string)
                     else:
                         data_to_save["class"].append(type(agent).__name__)
+                        data_to_save["trust"].append("not_applicable")
                 except KeyboardInterrupt:
                     pd.DataFrame(data_to_save).to_csv(
                         self.output_file_path, index=False
