@@ -3,4 +3,6 @@
 /output
 /new_output
 venv
+.venv
 __pycache__
+new_output.zip

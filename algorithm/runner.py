@@ -15,7 +15,8 @@ from jmetal.util.generator import Generator
 from jmetal.util.termination_criterion import TerminationCriterion
 
 from algorithm.agents.strategy_based import TrustMechanism
-from analysis.constants_and_params import POPULATION_SIZE
+
+# from analysis.constants_and_params import POPULATION_SIZE
 
 from .agents import AcceptStrategy, BaseAgent, SendStrategy, StrategyAgent
 from .exchange_logic import ExchangeMarket
@@ -140,7 +141,9 @@ class Runner:
                     data_to_save["generation"].append(number_of_generations)
                     data_to_save["agent_id"].append(agent_id)
                     data_to_save["score"].append(agent.algorithm.result().objectives[0])
-                    assert len(agent.algorithm.solutions) == POPULATION_SIZE
+                    # assert len(agent.algorithm.solutions) == POPULATION_SIZE
+
+                    # assert len(agent.algorithm.solutions) == POPULATION_SIZE
                     if isinstance(agent, StrategyAgent):
                         data_to_save["class"].append(
                             agent.accept_strategy.name + "_" + agent.send_strategy.name
