@@ -1,5 +1,6 @@
 from copy import deepcopy
 import datetime, os
+import random
 
 from jmetal.operator import BinaryTournamentSelection
 from jmetal.core.problem import BinaryProblem
@@ -7,12 +8,14 @@ from jmetal.core.problem import BinaryProblem
 from jmetal.operator.crossover import SBXCrossover, SPXCrossover
 from jmetal.operator.mutation import SimpleRandomMutation, BitFlipMutation
 from jmetal.util.termination_criterion import StoppingByEvaluations
+from jmetal.algorithm.singleobjective import GeneticAlgorithm
 
+
+from jmetal.problem.singleobjective.knapsack import Knapsack
 from algorithm import Runner
 from algorithm.agents.base import BaseAgent
 from analysis.constants_and_params import (
     OUTPUT_DIR,
-    PROBLEMS_TO_TEST,
     MULTI_CLASS_SETUP,
     TRUST_MECHANISM,
     NUMBER_OF_RUNS,
@@ -26,7 +29,10 @@ from analysis.constants_and_params import (
     STARTING_TRUST,
     NO_SEND_PENALTY,
     POPULATION_PART_TO_SWAP,
+    ALGORITHM_TYPES,
 )
+from knapsack import PROFITS, WEIGHTS
+from problems import LABS
 
 # Multi class setup parsing
 agents = MULTI_CLASS_SETUP[0]
@@ -41,7 +47,6 @@ def run_simulations_and_save_results():
         f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
     )
     migration_mechanism = "migration" if MIGRATION else "cloning"
-    custom_output = f"{OUTPUT_DIR}/{migration_mechanism}_{TRUST_MECHANISM}_starting_trust={STARTING_TRUST}_{start_date}"
 
     for _ in range(NUMBER_OF_RUNS):
         now = datetime.datetime.now()
@@ -49,41 +54,59 @@ def run_simulations_and_save_results():
             f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
         )
 
-        for problem in [problem_type(NUM_OF_VARS) for problem_type in PROBLEMS_TO_TEST]:
-            """BASE AGENT CLASS SIMULATION"""
-            # output_file_path = (
-            #     f"{OUTPUT_DIR}/{BaseAgent.name()}_{problem.name()}_{current_date}.csv"
-            # )
-            # run_single_simulation(BaseAgent, problem, output_file_path, None, None)
+        for algorithm_type in [GeneticAlgorithm]:
+            for problem in [
+                # LABS(NUM_OF_VARS),
+                Knapsack(
+                    number_of_items=100,
+                    capacity=1000,
+                    weights=deepcopy(WEIGHTS),
+                    profits=deepcopy(PROFITS),
+                ),
+            ]:
+                custom_output = f"{OUTPUT_DIR}/{migration_mechanism}_{TRUST_MECHANISM}_{algorithm_type.__name__}_starting_trust={STARTING_TRUST}_{start_date}"
 
-            """SINGLE AGENT CLASS SIMULATION"""
-            # for agent_class in AGENTS_TO_TEST:
-            #     if agent_class is StrategyAgent:
-            #         for accept_strategy in ACCEPT_STRATEGIES_TO_TEST:
-            #             for send_strategy in SEND_STRATEGIES_TO_TEST:
-            #                 output_file_path = f"{OUTPUT_DIR}/{agent_class.name()}_{accept_strategy}_{send_strategy}_{problem.name()}_{current_date}.csv"
-            #                 run_single_simulation(
-            #                     agent_class,
-            #                     problem,
-            #                     output_file_path,
-            #                     accept_strategy,
-            #                     send_strategy,
-            #                 )
-            #     else:
-            #         output_file_path = f"{OUTPUT_DIR}/{agent_class.name()}_{problem.name()}_{current_date}.csv"
-            #         run_single_simulation(
-            #             agent_class, problem, output_file_path, None, None
-            #         )
+                dir = f"{OUTPUT_DIR}/Base_{algorithm_type.__name__}"
+                os.makedirs(dir, exist_ok=True)
+                """BASE AGENT CLASS SIMULATION"""
+                output_file_path = f"{dir}/{BaseAgent.name()}_{problem.name()}_{current_date}_{algorithm_type.__name__}.csv"
+                run_single_simulation(
+                    BaseAgent, problem, output_file_path, None, None, algorithm_type
+                )
 
-            """ MULTI AGENT CLASS SIMULATION """
-            dir = f"{custom_output}/{problem.name()}"
-            os.makedirs(dir, exist_ok=True)
-            output_file_path = (
-                f"{dir}/CustomMultiClass_{problem.name()}_{current_date}.csv"
-            )
-            run_single_simulation(
-                agents, problem, output_file_path, accept_strategies, send_strategies
-            )
+                """SINGLE AGENT CLASS SIMULATION"""
+                # for agent_class in AGENTS_TO_TEST:
+                #     if agent_class is StrategyAgent:
+                #         for accept_strategy in ACCEPT_STRATEGIES_TO_TEST:
+                #             for send_strategy in SEND_STRATEGIES_TO_TEST:
+                #                 output_file_path = f"{OUTPUT_DIR}/{agent_class.name()}_{accept_strategy}_{send_strategy}_{problem.name()}_{current_date}.csv"
+                #                 run_single_simulation(
+                #                     agent_class,
+                #                     problem,
+                #                     output_file_path,
+                #                     accept_strategy,
+                #                     send_strategy,
+                #                 )
+                #     else:
+                #         output_file_path = f"{OUTPUT_DIR}/{agent_class.name()}_{problem.name()}_{current_date}.csv"
+                #         run_single_simulation(
+                #             agent_class, problem, output_file_path, None, None
+                #         )
+
+                # """ MULTI AGENT CLASS SIMULATION """
+                # dir = f"{custom_output}/{problem.name()}"
+                # os.makedirs(dir, exist_ok=True)
+                # output_file_path = (
+                #     f"{dir}/CustomMultiClass_{problem.name()}_{current_date}.csv"
+                # )
+                # run_single_simulation(
+                #     agents,
+                #     problem,
+                #     output_file_path,
+                #     accept_strategies,
+                #     send_strategies,
+                #     algorithm_type,
+                # )
 
 
 def run_single_simulation(
@@ -92,6 +115,7 @@ def run_single_simulation(
     output_file_path,
     accept_strategy,
     send_strategy,
+    algorithm_type,
 ):
     print(output_file_path)
     mutation = (
@@ -122,6 +146,7 @@ def run_single_simulation(
         starting_trust=STARTING_TRUST,
         no_send_penalty=NO_SEND_PENALTY,
         part_to_swap=POPULATION_PART_TO_SWAP,
+        algorithm_type=algorithm_type,
     )
     runner.run_simulation()
 

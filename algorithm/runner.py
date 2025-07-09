@@ -49,6 +49,7 @@ class Runner:
         no_send_penalty: Optional[int] = 2,
         part_to_swap: Optional[float] = 0.1,
         migration: bool = True,
+        algorithm_type: GeneticAlgorithm = GeneticAlgorithm,
     ):
         global_trust = {}
         # In case of a Uniform Agent Class simulation
@@ -80,7 +81,7 @@ class Runner:
         elif isinstance(agent_class, list):
             self.agents = [
                 agent_class[agent_nr](
-                    GeneticAlgorithm(
+                    algorithm_type(
                         problem,
                         population_size,
                         offspring_population_size,
@@ -141,8 +142,6 @@ class Runner:
                     data_to_save["generation"].append(number_of_generations)
                     data_to_save["agent_id"].append(agent_id)
                     data_to_save["score"].append(agent.algorithm.result().objectives[0])
-                    # assert len(agent.algorithm.solutions) == POPULATION_SIZE
-
                     # assert len(agent.algorithm.solutions) == POPULATION_SIZE
                     if isinstance(agent, StrategyAgent):
                         data_to_save["class"].append(

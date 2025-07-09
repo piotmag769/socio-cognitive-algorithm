@@ -1,9 +1,14 @@
 from algorithm.agents import StrategyAgent, AgentWithTrust
 from algorithm.agents.base import BaseAgent
 from algorithm.agents.strategy_based import AcceptStrategy, SendStrategy, TrustMechanism
-from problems import LABS, ExpandedSchaffer, Griewank
+from algorithm.follow_best import FollowBestGA
+from algorithm.follow_best_distinct import FollowBestDistinctGA
+from algorithm.repel_worst_gravity import RepelWorstGravity
+from algorithm.repel_worst_gravity_multistep import RepelWorstGravityMultistep
+from problems import LABS
+from jmetal.problem.singleobjective.knapsack import Knapsack
 
-OUTPUT_DIR = "./new_output"
+OUTPUT_DIR = "./socio_output"
 
 PLOTS_DIR = "./graphs"
 BOX_AND_WHISKERS_PLOTS_DIR = f"{PLOTS_DIR}/box_and_whiskers"
@@ -25,14 +30,16 @@ MIGRATION = True
 AGENTS_NUMBER = 24
 POPULATION_PART_TO_SWAP = 0.1
 NO_SEND_PENALTY = int(POPULATION_SIZE * POPULATION_PART_TO_SWAP)
+ALGORITHM_TYPES = [
+    FollowBestGA,
+    FollowBestDistinctGA,
+    RepelWorstGravity,
+    RepelWorstGravityMultistep,
+]
 
 AGENTS_TO_TEST = [BaseAgent, StrategyAgent]
 # TODO: add Ackley and other binary problem
-PROBLEMS_TO_TEST = [
-    LABS,
-    ExpandedSchaffer,
-    Griewank,
-]
+PROBLEMS_TO_TEST = [LABS, Knapsack]
 ACCEPT_STRATEGIES_TO_TEST = [
     strategy
     for strategy in AcceptStrategy  # if strategy is not AcceptStrategy.Different
@@ -47,17 +54,17 @@ SEND_STRATEGIES_TO_TEST = [
 # Group the names by problem type and have
 # the order of agents consistent between
 # the problem types.
-EXPERIMENTS = []
-for problem in PROBLEMS_TO_TEST:
-    for agent in AGENTS_TO_TEST:
-        if agent is StrategyAgent:
-            for accept_strategy in ACCEPT_STRATEGIES_TO_TEST:
-                for send_strategy in SEND_STRATEGIES_TO_TEST:
-                    EXPERIMENTS.append(
-                        f"{agent.name()}_{accept_strategy}_{send_strategy}_{problem.name()}"
-                    )
-        else:
-            EXPERIMENTS.append(f"{agent.name()}_{problem.name()}")
+# EXPERIMENTS = []
+# for problem in PROBLEMS_TO_TEST:
+#     for agent in AGENTS_TO_TEST:
+#         if agent is StrategyAgent:
+#             for accept_strategy in ACCEPT_STRATEGIES_TO_TEST:
+#                 for send_strategy in SEND_STRATEGIES_TO_TEST:
+#                     EXPERIMENTS.append(
+#                         f"{agent.name()}_{accept_strategy}_{send_strategy}_{problem.name()}"
+#                     )
+#         else:
+#             EXPERIMENTS.append(f"{agent.name()}_{problem.name()}")
 
 # CUSTOM MULTI CLASS CONFIG (leave one config uncommented if you want to run it)
 agents = []

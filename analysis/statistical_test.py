@@ -39,7 +39,7 @@ from .constants_and_params import (
 
 # def find_and_add_best_results(algorithms_best_results, regex, algorithm, problem):
 #     best_results_for_agent = []
-#     dir = f"{OUTPUT_DIR}/new/{problem}"
+#     dir = f"{OUTPUT_DIR}/base/{problem}"
 #     for filename in os.listdir(path=dir):
 #         if re.match(regex, filename):
 #             current_df = pd.read_csv(f"{dir}/{filename}")
@@ -54,7 +54,7 @@ def conduct_wilcoxon_tests():
     # Find base best results for each algorithm.
     base_algorithm_results = {}
     for problem in PROBLEMS_TO_TEST:
-        dir = f"output/new/{problem.name()}"
+        dir = f"output/base/{problem.name()}"
         base_algorithm_results[problem.name()] = find_best_results(dir)
 
     for dir in os.listdir(OUTPUT_DIR):
