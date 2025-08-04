@@ -50,10 +50,7 @@ class FollowBestDistinctGA(GeneticAlgorithm):
                     probabilities = softmax(std_devs)
 
                     # choose k genes positions based on probabilities
-                    K = ceil(
-                        solution.number_of_variables
-                        * self.mutation_operator.probability
-                    )
+                    K = ceil(number_of_genes * self.mutation_operator.probability)
                     positons_of_genes_to_mutate = random.choices(
                         list(range(number_of_genes)), weights=probabilities, k=K
                     )
@@ -63,9 +60,8 @@ class FollowBestDistinctGA(GeneticAlgorithm):
                         random.randint(0, len(best_individuals) - 1)
                     ]
                     # assign chosen teacher's genes to current offspring's
-                    for k in range(solution.number_of_variables):
-                        for l in positons_of_genes_to_mutate:
-                            solution.variables[k][l] = teacher.variables[k][l]
+                    for l in positons_of_genes_to_mutate:
+                        solution.variables[0][l] = teacher.variables[0][l]
 
                 offspring_population.append(solution)
                 if len(offspring_population) >= self.offspring_population_size:

@@ -24,7 +24,9 @@ class LABS(BinaryProblem):
         return 0
 
     def evaluate(self, solution: BinarySolution) -> BinarySolution:
-        solution.objectives[0] = energy_function(solution.variables[0])
+        solution.objectives[0] = energy_function(
+            np.array(solution.variables[0], dtype=int)
+        )
         return solution
 
     def create_solution(self) -> BinarySolution:
@@ -44,20 +46,30 @@ class LABS(BinaryProblem):
         return cls.__name__
 
 
-# TODO: optimize with numpy, the speed is terrible.
 def energy_function(sequence):
+    sequence = 2 * sequence - 1  # Convert from (0, 1) to (-1, 1)
     energy = 0
-    mapped_seq = list(map(lambda x: -1 if x is True else 1, sequence))
-    for distance in range(1, len(sequence)):
-        energy += aperiodic_autocorrelation(mapped_seq, distance) ** 2
+    N = len(sequence)
+    for distance in range(1, N):
+        autocorr = np.sum(sequence[: N - distance] * sequence[distance:])
+        energy += autocorr**2
     return energy
 
 
-def aperiodic_autocorrelation(sequence, distance):
-    autocorr = 0
-    for i in range(0, len(sequence) - distance):
-        autocorr += sequence[i] * sequence[i + distance]
-    return autocorr
+# # TODO: optimize with numpy, the speed is terrible.
+# def energy_function(sequence):
+#     energy = 0
+#     mapped_seq = list(map(lambda x: -1 if x is True else 1, sequence))
+#     for distance in range(1, len(sequence)):
+#         energy += aperiodic_autocorrelation(mapped_seq, distance) ** 2
+#     return energy
+
+
+# def aperiodic_autocorrelation(sequence, distance):
+#     autocorr = 0
+#     for i in range(0, len(sequence) - distance):
+#         autocorr += sequence[i] * sequence[i + distance]
+#     return autocorr
 
 
 def merit_factor(sequence):

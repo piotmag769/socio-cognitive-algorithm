@@ -1,9 +1,4 @@
-.idea
 .vscode
-/output
-/new_output
-/socio_output
-venv
 .venv
 __pycache__
-new_output.zip
+OFFICIAL_OUTPUT

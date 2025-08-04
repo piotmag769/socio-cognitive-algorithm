@@ -56,7 +56,7 @@ class Runner:
         if callable(agent_class):
             self.agents = [
                 agent_class(
-                    GeneticAlgorithm(
+                    algorithm_type(
                         problem,
                         population_size,
                         offspring_population_size,

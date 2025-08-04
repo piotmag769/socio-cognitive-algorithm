@@ -207,7 +207,7 @@ PROFITS = [
 def knapSack(W, wt, val, n):
 
     # Making the dp array
-    dp = [0 for i in range(W + 1)]
+    dp = [0 for _ in range(W + 1)]
 
     # Taking first i elements
     for i in range(1, n + 1):

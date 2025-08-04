@@ -34,11 +34,10 @@ class FollowBestGA(GeneticAlgorithm):
                         random.randint(0, len(best_individuals) - 1)
                     ]
                     # with given probability assign teacher's genes to current offspring's
-                    for k in range(solution.number_of_variables):
-                        for l in range(len(solution.variables[k])):
-                            rand = random.random()
-                            if rand <= self.mutation_operator.probability:
-                                solution.variables[k][l] = teacher.variables[k][l]
+                    for l in range(len(solution.variables[0])):
+                        rand = random.random()
+                        if rand <= self.mutation_operator.probability:
+                            solution.variables[0][l] = teacher.variables[0][l]
 
                 offspring_population.append(solution)
                 if len(offspring_population) >= self.offspring_population_size:
