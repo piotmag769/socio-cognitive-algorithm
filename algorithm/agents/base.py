@@ -1,6 +1,5 @@
 from functools import cmp_to_key
 from math import ceil
-from typing import Optional
 
 from jmetal.algorithm.singleobjective import GeneticAlgorithm
 from jmetal.core.solution import Solution
@@ -25,6 +24,7 @@ class BaseAgent:
         self,
         shared_solutions: list[Solution],
         agent_sharing_the_solution,
+        starting_population_size,
     ):
         self.algorithm.solutions.extend(shared_solutions)
         # Compare solutions (we assume they were already evaluated).
@@ -35,12 +35,20 @@ class BaseAgent:
         self.algorithm.solutions = self.algorithm.solutions[
             : self.algorithm.population_size
         ]
+        assert len(self.algorithm.solutions) == self.algorithm.population_size
 
     def remove_solutions(self, solutions):
+        remove_set = set()
+        for to_remove in solutions:
+            for i, solution in enumerate(self.algorithm.solutions):
+                if i not in remove_set and solution == to_remove:
+                    remove_set.add(i)
+                    break
+
         self.algorithm.solutions = [
             solution
-            for solution in self.algorithm.solutions
-            if solution not in solutions
+            for i, solution in enumerate(self.algorithm.solutions)
+            if i not in remove_set
         ]
 
     def __eq__(self, other) -> bool:

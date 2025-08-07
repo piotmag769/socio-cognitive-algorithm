@@ -10,7 +10,6 @@ from .constants_and_params import (
     MEAN_PLOTS_DIR,
     NUMBER_OF_ITERATIONS,
     OUTPUT_DIR,
-    EXPERIMENTS,
 )
 
 
@@ -19,7 +18,7 @@ def plot_and_save_graphs_with_mean_best_results_for_each_iteration():
     exp_iter = []
     exp_values = []
 
-    for experiment_name in ["Griewank"]:
+    for experiment_name in ["LABS"]:
         for filename in os.listdir(OUTPUT_DIR):
             regex = rf".*{experiment_name}.*\.csv"
             if re.match(regex, filename):

@@ -12,7 +12,6 @@ from .constants_and_params import (
     NUMBER_OF_ITERATIONS,
     OUTPUT_DIR,
     MULTI_CLASS_PLOTS_DIR,
-    STARTING_TRUST,
 )
 
 # BEST_TO_PLOT = 5
