@@ -26,16 +26,15 @@ class RepelWorstGravityMultistep(GeneticAlgorithm):
                 self.mutation_operator.execute(solution)
 
                 # "Repeal Worst Gravity" mutation
-                if len(offspring_population) > 0:
-                    # get worst individuals in current population
-                    worst_individuals = self.solutions[-RepelWorstGravityMultistep.N :]
-                    # use all worst individuals as repellers
-                    # with given probability make current offspring's genes a negation of repeller's
-                    for repeller in worst_individuals:
-                        for l in range(len(solution.variables[0])):
-                            rand = random.random()
-                            if rand <= self.mutation_operator.probability:
-                                solution.variables[0][l] = not repeller.variables[0][l]
+                # get worst individuals in current population
+                worst_individuals = self.solutions[-RepelWorstGravityMultistep.N :]
+                # use all worst individuals as repellers
+                # with given probability make current offspring's genes a negation of repeller's
+                for repeller in worst_individuals:
+                    for l in range(len(solution.variables[0])):
+                        rand = random.random()
+                        if rand <= self.mutation_operator.probability:
+                            solution.variables[0][l] = not repeller.variables[0][l]
 
                 offspring_population.append(solution)
                 if len(offspring_population) >= self.offspring_population_size:

@@ -31,7 +31,6 @@ class ExchangeMarket:
             paired_agent = random.choice(not_paired_agents)
             was_paired[paired_agent] = True
 
-            starting_population_size = len(agent.algorithm.solutions)
             paired_agent_shared_solutions = paired_agent.get_solutions_to_share(agent)
             agent_shared_solutions = agent.get_solutions_to_share(paired_agent)
 
@@ -39,10 +38,6 @@ class ExchangeMarket:
                 paired_agent.remove_solutions(paired_agent_shared_solutions)
                 agent.remove_solutions(agent_shared_solutions)
 
-            agent.use_shared_solutions(
-                paired_agent_shared_solutions, paired_agent, starting_population_size
-            )
+            agent.use_shared_solutions(paired_agent_shared_solutions, paired_agent)
 
-            paired_agent.use_shared_solutions(
-                agent_shared_solutions, agent, starting_population_size
-            )
+            paired_agent.use_shared_solutions(agent_shared_solutions, agent)

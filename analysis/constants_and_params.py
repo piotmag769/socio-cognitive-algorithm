@@ -12,7 +12,7 @@ from jmetal.problem.singleobjective.knapsack import Knapsack
 from jmetal.problem.singleobjective.tsp import TSP
 from jmetal.algorithm.singleobjective import GeneticAlgorithm
 
-OUTPUT_DIR = "./OFFICIAL_OUTPUT"
+OUTPUT_DIR = "./FIXED"
 
 PLOTS_DIR = "./graphs"
 BOX_AND_WHISKERS_PLOTS_DIR = f"{PLOTS_DIR}/box_and_whiskers"
@@ -28,7 +28,6 @@ OFFSPRING_POPULATION_SIZE = 10
 GENERATIONS_PER_SWAP = 10
 MAX_EVALUATIONS = 10000
 MIGRATION = True
-AGENTS_NUMBER = 12
 POPULATION_PART_TO_SWAP = 0.1
 NO_SEND_PENALTY = int(POPULATION_SIZE * POPULATION_PART_TO_SWAP)
 ALGORITHM_TYPES = [
@@ -48,7 +47,6 @@ accept_strategies = []
 for send_strategy in [
     SendStrategy.Best,
     SendStrategy.Average,
-    SendStrategy.Random,
     SendStrategy.Outlying,
 ]:
     for accept_strategy in [
@@ -61,3 +59,5 @@ for send_strategy in [
         accept_strategies.append(accept_strategy)
 
 MULTI_CLASS_SETUP = [agents, send_strategies, accept_strategies]
+AGENTS_NUMBER = len(MULTI_CLASS_SETUP[0])
+assert AGENTS_NUMBER == 9

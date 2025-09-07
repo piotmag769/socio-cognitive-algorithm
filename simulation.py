@@ -39,40 +39,40 @@ accept_strategies = MULTI_CLASS_SETUP[2]
 def run_simulations_and_save_results():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     now = datetime.datetime.now()
-
-    for starting_trust in [0, 10, 20]:
-        for trust_mechanism in [TrustMechanism.Local, TrustMechanism.Global]:
-            for _ in range(NUMBER_OF_RUNS):
-                now = datetime.datetime.now()
-                current_date = f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
-
-                for algorithm_type in ALGORITHM_TYPES:
-                    for problem in [
-                        TSP("tsp.txt"),
-                        LABS(100),
-                        Knapsack(
-                            number_of_items=100,
-                            capacity=1000,
-                            weights=deepcopy(WEIGHTS),
-                            profits=deepcopy(PROFITS),
-                        ),
+    for x in range(NUMBER_OF_RUNS):
+        current_date = (
+            f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}_{x}"
+        )
+        for problem in [
+            LABS(100),
+            Knapsack(
+                number_of_items=100,
+                capacity=1000,
+                weights=deepcopy(WEIGHTS),
+                profits=deepcopy(PROFITS),
+            ),
+        ]:
+            for algorithm_type in ALGORITHM_TYPES:
+                """BASE AGENT CLASS SIMULATION"""
+                dir = f"{OUTPUT_DIR}/{problem.name()}/{BaseAgent.name()}/{algorithm_type.__name__}"
+                os.makedirs(dir, exist_ok=True)
+                output_file_path = f"{dir}/{BaseAgent.name()}_{problem.name()}_migration_{algorithm_type.__name__}_{current_date}_.csv"
+                run_single_simulation(
+                    BaseAgent,
+                    problem,
+                    output_file_path,
+                    None,
+                    None,
+                    algorithm_type,
+                    MIGRATION,
+                    None,
+                    None,
+                )
+                for starting_trust in [0, 10, 20]:
+                    for trust_mechanism in [
+                        TrustMechanism.Local,
+                        TrustMechanism.Global,
                     ]:
-                        # """BASE AGENT CLASS SIMULATION"""
-                        # dir = f"{OUTPUT_DIR}/{problem.name()}/{BaseAgent.name()}/{algorithm_type.__name__}"
-                        # os.makedirs(dir, exist_ok=True)
-                        # output_file_path = f"{dir}/{BaseAgent.name()}_{problem.name()}_migration_{algorithm_type.__name__}_{current_date}_.csv"
-                        # run_single_simulation(
-                        #     BaseAgent,
-                        #     problem,
-                        #     output_file_path,
-                        #     None,
-                        #     None,
-                        #     algorithm_type,
-                        #     MIGRATION,
-                        #     None,
-                        #     None,
-                        # )
-
                         """MULTI AGENT CLASS SIMULATION"""
                         dir = f"{OUTPUT_DIR}/{problem.name()}/AllMultiClass/{algorithm_type.__name__}/{trust_mechanism}/starting_trust={starting_trust}"
                         os.makedirs(dir, exist_ok=True)
@@ -88,6 +88,44 @@ def run_simulations_and_save_results():
                             starting_trust,
                             trust_mechanism,
                         )
+        for problem in [
+            TSP("tsp.txt"),
+        ]:
+            """BASE AGENT CLASS SIMULATION"""
+            dir = f"{OUTPUT_DIR}/{problem.name()}/{BaseAgent.name()}/{algorithm_type.__name__}"
+            os.makedirs(dir, exist_ok=True)
+            output_file_path = f"{dir}/{BaseAgent.name()}_{problem.name()}_migration_{algorithm_type.__name__}_{current_date}_.csv"
+            run_single_simulation(
+                BaseAgent,
+                problem,
+                output_file_path,
+                None,
+                None,
+                GeneticAlgorithm,
+                MIGRATION,
+                None,
+                None,
+            )
+            for starting_trust in [0, 10, 20]:
+                for trust_mechanism in [
+                    TrustMechanism.Local,
+                    TrustMechanism.Global,
+                ]:
+                    """MULTI AGENT CLASS SIMULATION"""
+                    dir = f"{OUTPUT_DIR}/{problem.name()}/AllMultiClass/{algorithm_type.__name__}/{trust_mechanism}/starting_trust={starting_trust}"
+                    os.makedirs(dir, exist_ok=True)
+                    output_file_path = f"{dir}/AllMultiClass_{problem.name()}_migration_{trust_mechanism}_{algorithm_type.__name__}_starting_trust={starting_trust}_{current_date}.csv"
+                    run_single_simulation(
+                        agents,
+                        problem,
+                        output_file_path,
+                        accept_strategies,
+                        send_strategies,
+                        GeneticAlgorithm,
+                        MIGRATION,
+                        starting_trust,
+                        trust_mechanism,
+                    )
 
 
 from jmetal.core.problem import BinaryProblem

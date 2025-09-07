@@ -1,5 +1,4 @@
 from copy import deepcopy
-import random
 
 from enum import Enum
 from functools import cmp_to_key
@@ -18,23 +17,16 @@ from .base import BaseAgent
 class SendStrategy(Enum):
     Best = 1
     Average = 2
-    Worst = 3
     Outlying = 4
-    Random = 5
-    Dont = 6
 
 
 class AcceptStrategy(Enum):
     Always = 1
     Better = 2
     Different = 3
-    Reject = 4
 
 
-# 1. Modyfikacja zaufania na podstawie liczby przyjętych osobników (DONE)
-# 2. Modyfikacja zaufania na podstawie czy najlepszy osobnik na wyspie ma lepszy fitness po akceptacji/po 10 iteracjach
-
-
+# Modyfikacja zaufania na podstawie liczby przyjętych osobników (DONE)
 # max_trust = 0, min zaufanie = -inf
 # wysyłamy "najlepszych" osobników, ale bez trust(A, B) "najlepszych"
 # dictionary: zaufanie - lokalne, reputacja - globalne
@@ -109,18 +101,6 @@ class StrategyAgent(BaseAgent):
                 // 2 : (number_of_solutions + solutions_to_share)
                 // 2
             ]
-        elif self.send_strategy is SendStrategy.Worst:
-            chosen_solutions = self.algorithm.solutions[
-                (
-                    -solutions_to_share - index_of_best_solution_to_share
-                ) : -index_of_best_solution_to_share
-            ]
-        elif self.send_strategy is SendStrategy.Random:
-            chosen_solutions = random.sample(
-                self.algorithm.solutions, solutions_to_share
-            )
-        elif self.send_strategy is SendStrategy.Dont:
-            chosen_solutions = []
         elif self.send_strategy is SendStrategy.Outlying:
             chosen_solutions = self.rank_outliers()[
                 index_of_best_solution_to_share : (
@@ -133,109 +113,62 @@ class StrategyAgent(BaseAgent):
         self,
         shared_solutions: list[Solution],
         agent_sharing_the_solution,
-        starting_population_size,
     ):
+        self.algorithm.solutions.extend(shared_solutions)
+        assert len(self.algorithm.solutions) == self.algorithm.population_size
+
         if self.accept_strategy is AcceptStrategy.Always:
-            shared_solutions.extend(self.algorithm.solutions)
-            self.algorithm.solutions = shared_solutions[
-                : self.algorithm.population_size
-            ]
-
-            # Sort to keep in order.
-            self.algorithm.solutions.sort(
-                key=cmp_to_key(self.algorithm.solution_comparator.compare)
-            )
+            pass
         elif self.accept_strategy is AcceptStrategy.Better:
-            self.algorithm.solutions.extend(shared_solutions)
             self.algorithm.solutions.sort(
                 key=cmp_to_key(self.algorithm.solution_comparator.compare)
             )
 
-            self.algorithm.solutions = self.algorithm.solutions[
-                : self.algorithm.population_size
-            ]
+            better_solutions = self.algorithm.solutions[:8]
             if self.trust is not None:
                 if agent_sharing_the_solution not in self.trust:
-                    self.trust[agent_sharing_the_solution] = (
-                        self.__class__.MAX_TRUST_LEVEL
-                    )
+                    self.trust[agent_sharing_the_solution] = self.starting_trust
 
                 trust_change = 0
-                if len(shared_solutions) > 0:
-                    for shared_solution in shared_solutions:
-                        if shared_solution in self.algorithm.solutions:
-                            # A useful solution was shared.
-                            trust_change -= 1
-                        else:
-                            # A useless solution was shared.
-                            trust_change += 1
-                else:
-                    trust_change = self.no_send_penalty
+                for shared_solution in shared_solutions:
+                    if shared_solution in better_solutions:
+                        # A useful solution was shared.
+                        trust_change -= 1
+                    else:
+                        # A useless solution was shared.
+                        trust_change += 1
 
                 self.trust[agent_sharing_the_solution] = max(
                     self.__class__.MAX_TRUST_LEVEL,
                     self.trust[agent_sharing_the_solution] + trust_change,
                 )
-
-        elif self.accept_strategy is AcceptStrategy.Reject:
-            pass
         elif self.accept_strategy is AcceptStrategy.Different:
-            self.algorithm.solutions.extend(shared_solutions)
-            self.algorithm.solutions = self.rank_outliers()[
-                : self.algorithm.population_size
-            ]
-
-            self.algorithm.solutions.sort(
-                key=cmp_to_key(self.algorithm.solution_comparator.compare)
-            )
+            better_solutions = self.rank_outliers()[:8]
 
             if self.trust is not None:
                 if agent_sharing_the_solution not in self.trust:
-                    self.trust[agent_sharing_the_solution] = (
-                        self.__class__.MAX_TRUST_LEVEL
-                    )
+                    self.trust[agent_sharing_the_solution] = self.starting_trust
 
-                if len(shared_solutions) > 0:
-                    trust_change = 0
-                    for shared_solution in shared_solutions:
-                        if shared_solution in self.algorithm.solutions:
-                            # A useful solution was shared.
-                            trust_change -= 1
-                        else:
-                            # A useless solution was shared.
-                            trust_change += 1
-                else:
-                    trust_change = self.no_send_penalty
+                trust_change = 0
+                for shared_solution in shared_solutions:
+                    if shared_solution in better_solutions:
+                        # A useful solution was shared.
+                        trust_change -= 1
+                    else:
+                        # A useless solution was shared.
+                        trust_change += 1
 
                 self.trust[agent_sharing_the_solution] = max(
                     self.__class__.MAX_TRUST_LEVEL,
                     self.trust[agent_sharing_the_solution] + trust_change,
                 )
 
-        """
-        In some cases (e.g. when Agent sends but does not accept solutions) the population size decreases.
-        To keep the population size constant, we need to fill in the gaps.
-        Currently we use method that creates a new solution by crossing existing solutions. 
-        """
-        if len(self.algorithm.solutions) < starting_population_size:
-            parents_for_crossover = (
-                self.algorithm.crossover_operator.get_number_of_parents()
-            )
-            mating_population = self.algorithm.solutions[
-                : len(self.algorithm.solutions)
-                - len(self.algorithm.solutions) % parents_for_crossover
-            ]
-            new_solutions = self.algorithm.reproduction(mating_population)
-            self.algorithm.solutions.extend(
-                new_solutions[
-                    : starting_population_size - len(self.algorithm.solutions)
-                ]
-            )
-
+        # Sort to keep in order.
+        self.algorithm.solutions.sort(
+            key=cmp_to_key(self.algorithm.solution_comparator.compare)
+        )
         # Double Check
-        assert (
-            len(self.algorithm.solutions) == starting_population_size
-        ), "Population refill is not enough!!!"
+        assert len(self.algorithm.solutions) == self.algorithm.population_size
 
     # Returns solutions sorted by the dot product of its variables and the mean variables of all the solutions
     # in an ascending order.

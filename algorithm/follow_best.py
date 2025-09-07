@@ -26,18 +26,17 @@ class FollowBestGA(GeneticAlgorithm):
                 self.mutation_operator.execute(solution)
 
                 # "Follow Best" mutation
-                if len(offspring_population) > 0:
-                    # get top individuals in current population
-                    best_individuals = self.solutions[: FollowBestGA.N]
-                    # randomly select one to be a teacher
-                    teacher = best_individuals[
-                        random.randint(0, len(best_individuals) - 1)
-                    ]
-                    # with given probability assign teacher's genes to current offspring's
-                    for l in range(len(solution.variables[0])):
-                        rand = random.random()
-                        if rand <= self.mutation_operator.probability:
-                            solution.variables[0][l] = teacher.variables[0][l]
+                # get top individuals in current population
+                best_individuals = self.solutions[: FollowBestGA.N]
+                # randomly select one to be a teacher
+                teacher = best_individuals[
+                    random.randint(0, len(best_individuals) - 1)
+                ]
+                # with given probability assign teacher's genes to current offspring's
+                for l in range(len(solution.variables[0])):
+                    rand = random.random()
+                    if rand <= self.mutation_operator.probability:
+                        solution.variables[0][l] = teacher.variables[0][l]
 
                 offspring_population.append(solution)
                 if len(offspring_population) >= self.offspring_population_size:

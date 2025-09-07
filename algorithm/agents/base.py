@@ -24,7 +24,6 @@ class BaseAgent:
         self,
         shared_solutions: list[Solution],
         agent_sharing_the_solution,
-        starting_population_size,
     ):
         self.algorithm.solutions.extend(shared_solutions)
         # Compare solutions (we assume they were already evaluated).

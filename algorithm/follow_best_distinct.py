@@ -29,39 +29,36 @@ class FollowBestDistinctGA(GeneticAlgorithm):
                 self.mutation_operator.execute(solution)
 
                 # "Follow Best Distinct" mutation
-                if len(offspring_population) > 0:
-                    # get top individuals in current population
-                    best_individuals = self.solutions[: FollowBestDistinctGA.N]
+                # get top individuals in current population
+                best_individuals = self.solutions[: FollowBestDistinctGA.N]
 
-                    # calculate std deviations for top individuals for each gene position
-                    number_of_genes = len(self.solutions[0].variables[0])
-                    std_devs = []
-                    for bit_position in range(number_of_genes):
-                        std_devs.append(
-                            np.std(
-                                [
-                                    solution.variables[0][bit_position]
-                                    for solution in best_individuals
-                                ],
-                                ddof=1,
-                            )
+                # calculate std deviations for top individuals for each gene position
+                number_of_genes = len(self.solutions[0].variables[0])
+                std_devs = []
+                for bit_position in range(number_of_genes):
+                    std_devs.append(
+                        np.std(
+                            [
+                                solution.variables[0][bit_position]
+                                for solution in best_individuals
+                            ],
+                            ddof=1,
                         )
-                    # calculate probabilities from deviations via softmax
-                    probabilities = softmax(std_devs)
-
-                    # choose k genes positions based on probabilities
-                    K = ceil(number_of_genes * self.mutation_operator.probability)
-                    positons_of_genes_to_mutate = random.choices(
-                        list(range(number_of_genes)), weights=probabilities, k=K
                     )
+                # calculate probabilities from deviations via softmax
+                probabilities = softmax(std_devs)
 
-                    # randomly select one to be a teacher
-                    teacher = best_individuals[
-                        random.randint(0, len(best_individuals) - 1)
-                    ]
-                    # assign chosen teacher's genes to current offspring's
-                    for l in positons_of_genes_to_mutate:
-                        solution.variables[0][l] = teacher.variables[0][l]
+                # choose k genes positions based on probabilities
+                K = ceil(number_of_genes * self.mutation_operator.probability)
+                positons_of_genes_to_mutate = random.choices(
+                    list(range(number_of_genes)), weights=probabilities, k=K
+                )
+
+                # randomly select one to be a teacher
+                teacher = best_individuals[random.randint(0, len(best_individuals) - 1)]
+                # assign chosen teacher's genes to current offspring's
+                for l in positons_of_genes_to_mutate:
+                    solution.variables[0][l] = teacher.variables[0][l]
 
                 offspring_population.append(solution)
                 if len(offspring_population) >= self.offspring_population_size:

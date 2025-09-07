@@ -14,7 +14,7 @@ from .constants_and_params import (
 
 def conduct_wilcoxon_tests():
     for problem in PROBLEMS_TO_TEST:
-        problem_dir = f"./{OUTPUT_DIR}/{problem.name()}"
+        problem_dir = f"{OUTPUT_DIR}/{problem.name()}"
         base_dir = f"{problem_dir}/BaseAgent/GeneticAlgorithm"
         base_results = find_best_results(base_dir)
 
@@ -22,10 +22,11 @@ def conduct_wilcoxon_tests():
             if len(dirs) == 0 and base_dir != root:
                 algorithms_best_results = find_best_results(root)
 
-                if (
-                    wilcoxon(algorithms_best_results, base_results).pvalue
-                    <= SIGNIFICANCE_LEVEL
-                ) and np.mean(algorithms_best_results) <= np.mean(base_results):
+                test = wilcoxon(algorithms_best_results, base_results).pvalue
+                if (test <= 0.05) and np.mean(algorithms_best_results) <= np.mean(
+                    base_results
+                ):
+                    print(test)
                     print(f"STATISTICALLY DIFFERENT: {root}")
                     print(
                         f"BEST: {np.mean(algorithms_best_results)} BASE: {np.mean(base_results)}"
