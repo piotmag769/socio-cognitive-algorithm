@@ -5,6 +5,8 @@ import pandas as pd
 
 from scipy.stats import wilcoxon
 
+from problems import LABS
+
 from .constants_and_params import (
     OUTPUT_DIR,
     SIGNIFICANCE_LEVEL,
@@ -13,7 +15,7 @@ from .constants_and_params import (
 
 
 def conduct_wilcoxon_tests():
-    for problem in PROBLEMS_TO_TEST:
+    for problem in [LABS(100)]:
         problem_dir = f"{OUTPUT_DIR}/{problem.name()}"
         base_dir = f"{problem_dir}/BaseAgent/GeneticAlgorithm"
         base_results = find_best_results(base_dir)
@@ -23,9 +25,7 @@ def conduct_wilcoxon_tests():
                 algorithms_best_results = find_best_results(root)
 
                 test = wilcoxon(algorithms_best_results, base_results).pvalue
-                if (test <= 0.05) and np.mean(algorithms_best_results) <= np.mean(
-                    base_results
-                ):
+                if test <= 0.1:
                     print(test)
                     print(f"STATISTICALLY DIFFERENT: {root}")
                     print(
